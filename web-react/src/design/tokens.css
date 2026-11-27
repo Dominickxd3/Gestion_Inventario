@@ -1,0 +1,71 @@
+/* Tokens del sistema de diseño ScanGP. Ver DESIGN.md §3.
+   Ningún componente debe usar colores, tamaños o espacios literales. */
+:root {
+  /* Color: base neutra */
+  --color-bg: #ffffff;
+  --color-bg-subtle: #f7f8fa;
+  --color-bg-muted: #eff1f4;
+  --color-border: #e3e6ea;
+  --color-border-strong: #cdd2d9;
+  --color-text: #14171c;
+  --color-text-secondary: #4a5260;
+  --color-text-tertiary: #6b7380;
+
+  /* Color: acento único */
+  --color-accent: #3a55c4;
+  --color-accent-hover: #2f47a8;
+  --color-accent-subtle: #eef1fb;
+
+  /* Color: estados */
+  --color-success: #2f7d4a;
+  --color-success-subtle: #edf6f0;
+  --color-warning: #9a6212;
+  --color-warning-subtle: #fbf4e8;
+  --color-danger: #b42e2e;
+  --color-danger-subtle: #fbeeee;
+
+  /* Tipografía */
+  --font-sans: 'Inter', 'InterVariable', system-ui, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Mono', Consolas, monospace;
+
+  --text-display: 600 28px/34px var(--font-sans);
+  --text-title: 600 20px/28px var(--font-sans);
+  --text-heading: 600 15px/22px var(--font-sans);
+  --text-body: 400 14px/20px var(--font-sans);
+  --text-label: 500 13px/18px var(--font-sans);
+  --text-caption: 400 12px/16px var(--font-sans);
+
+  /* Espaciado (rejilla de 4 px) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Forma y elevación */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --border-hairline: 1px solid var(--color-border);
+  --shadow-overlay: 0 8px 24px rgb(20 23 28 / 0.12);
+
+  /* Movimiento */
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Layout */
+  --sidebar-width: 232px;
+  --content-max: 1200px;
+  --row-height: 40px;
+  --focus-ring: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+  }
+}

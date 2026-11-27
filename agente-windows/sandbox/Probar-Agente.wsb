@@ -1,0 +1,15 @@
+<Configuration>
+  <!-- Doble clic en este archivo: abre un Windows limpio y desechable y ejecuta el agente. -->
+  <Networking>Enable</Networking>
+  <MemoryInMB>4096</MemoryInMB>
+  <MappedFolders>
+    <MappedFolder>
+      <HostFolder>C:\Users\Dominick\Documents\inventario_modulo\agente-windows</HostFolder>
+      <SandboxFolder>C:\Users\WDAGUtilityAccount\Desktop\agente-windows</SandboxFolder>
+      <ReadOnly>true</ReadOnly>
+    </MappedFolder>
+  </MappedFolders>
+  <LogonCommand>
+    <Command>powershell.exe -ExecutionPolicy Bypass -File C:\Users\WDAGUtilityAccount\Desktop\agente-windows\sandbox\probar.ps1</Command>
+  </LogonCommand>
+</Configuration>

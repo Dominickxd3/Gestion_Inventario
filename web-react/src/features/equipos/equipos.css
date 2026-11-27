@@ -1,0 +1,122 @@
+.lista-equipos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.equipo-fila {
+  display: grid;
+  grid-template-columns: 20px minmax(140px, 220px) 1fr auto 16px;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-2);
+  margin: 0 calc(var(--space-2) * -1);
+  border-bottom: var(--border-hairline);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  text-decoration: none;
+}
+.equipo-fila:hover {
+  background: var(--color-bg-subtle);
+  text-decoration: none;
+}
+.equipo-fila-icono {
+  display: flex;
+}
+.equipo-fila-nombre {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.equipo-fila-detalle {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-secondary);
+}
+.equipo-fila-meta {
+  font: var(--text-caption);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+.equipo-fila-chevron {
+  color: var(--color-text-tertiary);
+}
+@media (max-width: 767px) {
+  .equipo-fila {
+    grid-template-columns: 20px 1fr 16px;
+    row-gap: 2px;
+  }
+  .equipo-fila-detalle,
+  .equipo-fila-meta {
+    grid-column: 2;
+    white-space: normal;
+  }
+  .equipo-fila-chevron {
+    grid-row: 1;
+    grid-column: 3;
+  }
+}
+
+/* Filtros de la lista */
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+.campo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text-tertiary);
+}
+.campo:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+.campo input,
+.campo select {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-text);
+  min-height: 30px;
+}
+.campo-busqueda {
+  flex: 1 1 280px;
+  max-width: 400px;
+}
+.campo-busqueda input {
+  width: 100%;
+}
+.filtros-total {
+  margin-left: auto;
+  font: var(--text-label);
+  color: var(--color-text-tertiary);
+}
+
+.tabla-equipos .celda-equipo {
+  display: grid;
+}
+.tabla-equipos .celda-equipo a {
+  color: var(--color-text);
+  font-weight: 500;
+}
+.tabla-equipos .celda-tipo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+.tabla-equipos tbody tr {
+  cursor: pointer;
+}

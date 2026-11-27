@@ -1,0 +1,22 @@
+# Dependencias y compilados
+node_modules/
+dist/
+obj/
+*.tsbuildinfo
+
+# Configuración local y secretos
+.env
+.env.*
+!.env.example
+
+# Datos de inventario (información real de los equipos)
+api-nest/data/
+*.json.tmp
+pendiente.json
+prueba.json
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

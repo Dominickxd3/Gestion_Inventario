@@ -1,0 +1,110 @@
+/* Neutraliza el tema Lara de PrimeReact con los tokens de ScanGP (DESIGN.md §4). */
+:root {
+  --primary-color: var(--color-accent);
+  --primary-color-text: #ffffff;
+  --font-family: var(--font-sans);
+  --border-radius: var(--radius-sm);
+  --focus-ring: var(--focus-ring);
+}
+
+/* Tablas: sin bordes exteriores, cabecera sutil, filas densas */
+.p-datatable {
+  font: var(--text-body);
+}
+.p-datatable .p-datatable-thead > tr > th {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-secondary);
+  font: var(--text-label);
+  border-color: var(--color-border);
+  border-width: 0 0 1px;
+  padding: var(--space-2) var(--space-3);
+  white-space: nowrap;
+}
+.p-datatable .p-datatable-tbody > tr {
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+.p-datatable .p-datatable-tbody > tr > td {
+  border-color: var(--color-border);
+  border-width: 0 0 1px;
+  padding: var(--space-2) var(--space-3);
+  height: var(--row-height);
+  vertical-align: middle;
+}
+.p-datatable .p-datatable-tbody > tr.p-row-odd {
+  background: var(--color-bg);
+}
+.p-datatable.p-datatable-hoverable-rows .p-datatable-tbody > tr:not(.p-highlight):hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-text);
+}
+.p-datatable .p-sortable-column:not(.p-highlight):hover {
+  background: var(--color-bg-muted);
+  color: var(--color-text);
+}
+.p-datatable .p-sortable-column.p-highlight {
+  background: var(--color-bg-subtle);
+  color: var(--color-accent);
+}
+.p-datatable .p-sortable-column.p-highlight .p-sortable-column-icon {
+  color: var(--color-accent);
+}
+.p-datatable .p-sortable-column .p-sortable-column-icon {
+  width: 12px;
+  height: 12px;
+  color: var(--color-text-tertiary);
+}
+.p-datatable .p-sortable-column:focus-visible,
+.p-datatable .p-datatable-tbody > tr:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+  box-shadow: none;
+}
+.p-datatable .p-datatable-emptymessage td {
+  color: var(--color-text-tertiary);
+  padding: var(--space-5) var(--space-3);
+}
+.p-datatable th.num, .p-datatable td.num {
+  text-align: right;
+}
+.p-datatable th.num .p-column-header-content {
+  justify-content: flex-end;
+}
+
+/* Modo apilado en móvil */
+@media (max-width: 767px) {
+  .p-datatable.p-datatable-responsive-stack .p-datatable-tbody > tr > td {
+    height: auto;
+    padding: var(--space-1) var(--space-3);
+  }
+  .p-datatable.p-datatable-responsive-stack .p-datatable-tbody > tr > td.num {
+    text-align: left;
+  }
+  .p-datatable .p-column-title {
+    color: var(--color-text-tertiary);
+    font: var(--text-caption);
+  }
+}
+
+/* Toast */
+.p-toast .p-toast-message {
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-overlay);
+  border: var(--border-hairline);
+  border-left-width: 3px;
+  background: var(--color-bg);
+}
+.p-toast .p-toast-message.p-toast-message-success {
+  border-left-color: var(--color-success);
+  color: var(--color-text);
+}
+.p-toast .p-toast-message .p-toast-message-content .p-toast-summary {
+  font: var(--text-heading);
+}
+.p-toast .p-toast-message .p-toast-message-content .p-toast-detail {
+  font: var(--text-body);
+  color: var(--color-text-secondary);
+}
+.p-toast .p-toast-message.p-toast-message-success .p-toast-message-icon {
+  color: var(--color-success);
+}
