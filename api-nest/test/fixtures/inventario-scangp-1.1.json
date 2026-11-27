@@ -1,0 +1,573 @@
+{
+  "equipo": {
+    "nombreEquipo": "EQUIPO-PRUEBA",
+    "usuario": "EQUIPO-PRUEBA\\usuario.prueba",
+    "usuarioEjecucion": "EQUIPO-PRUEBA\\usuario.prueba",
+    "dominio": "WORKGROUP",
+    "enDominio": false,
+    "fabricante": "Dell Inc",
+    "modelo": "Inspiron 16 7630 2-in-1",
+    "modeloCodigo": null,
+    "familia": "Inspiron",
+    "sku": "0C18",
+    "numeroSerie": "SERIE-PRUEBA-5",
+    "uuid": "11111111-2222-3333-4444-000000000006",
+    "etiquetaActivo": null,
+    "tipo": "LAPTOP",
+    "tipoDeteccion": "chasis 31",
+    "chasisCodigos": [
+      31
+    ],
+    "tieneBateria": true,
+    "ensamblada": false
+  },
+  "sistemaOperativo": {
+    "nombre": "Microsoft Windows 11 Home",
+    "version": "10.0.26300",
+    "build": "26300",
+    "arquitectura": "64 bits",
+    "idioma": "es-ES, en-US, es-MX",
+    "fechaInstalacion": "2026-11-10T21:01:31.0000000Z",
+    "ultimoArranque": "2026-11-16T19:08:15.0600500Z",
+    "idProducto": "00000-00000-00000-AAOEM",
+    "versionComercial": "26H2",
+    "buildCompleto": "26300.9974"
+  },
+  "placaBase": {
+    "fabricante": "Dell Inc",
+    "modelo": "06D3VP",
+    "version": "A00",
+    "numeroSerie": "SERIE-PRUEBA-7"
+  },
+  "bios": {
+    "fabricante": "Dell Inc.",
+    "version": "1.30.0",
+    "fecha": "2026-06-29T00:00:00.0000000Z",
+    "versionSMBIOS": "3.6",
+    "modoArranque": "UEFI"
+  },
+  "procesadores": [
+    {
+      "nombre": "13th Gen Intel(R) Core(TM) i7-1360P",
+      "fabricante": "GenuineIntel",
+      "nucleos": 12,
+      "hilos": 16,
+      "velocidadMaxMHz": 2200,
+      "socket": "U3E1",
+      "cacheL2KB": 9216,
+      "cacheL3KB": 18432,
+      "idProcesador": "SERIE-PRUEBA-8",
+      "virtualizacionHabilitada": false
+    }
+  ],
+  "memoria": {
+    "instaladaBytes": 17179869184,
+    "utilizableBytes": 16849256448,
+    "ranurasTotales": 0,
+    "ranurasUsadas": 0,
+    "modulos": [
+      {
+        "banco": "Motherboard",
+        "capacidadBytes": 2147483648,
+        "velocidadMHz": 4800,
+        "velocidadMaxMHz": 6400,
+        "fabricante": null,
+        "numeroParte": "MT62F1G32D4DR-031",
+        "numeroSerie": null,
+        "tipo": "LPDDR5",
+        "formato": "Soldada",
+        "soldado": true
+      },
+      {
+        "banco": "Motherboard",
+        "capacidadBytes": 2147483648,
+        "velocidadMHz": 4800,
+        "velocidadMaxMHz": 6400,
+        "fabricante": null,
+        "numeroParte": "MT62F1G32D4DR-031",
+        "numeroSerie": null,
+        "tipo": "LPDDR5",
+        "formato": "Soldada",
+        "soldado": true
+      },
+      {
+        "banco": "Motherboard",
+        "capacidadBytes": 2147483648,
+        "velocidadMHz": 4800,
+        "velocidadMaxMHz": 6400,
+        "fabricante": null,
+        "numeroParte": "MT62F1G32D4DR-031",
+        "numeroSerie": null,
+        "tipo": "LPDDR5",
+        "formato": "Soldada",
+        "soldado": true
+      },
+      {
+        "banco": "Motherboard",
+        "capacidadBytes": 2147483648,
+        "velocidadMHz": 4800,
+        "velocidadMaxMHz": 6400,
+        "fabricante": null,
+        "numeroParte": "MT62F1G32D4DR-031",
+        "numeroSerie": null,
+        "tipo": "LPDDR5",
+        "formato": "Soldada",
+        "soldado": true
+      },
+      {
+        "banco": "Motherboard",
+        "capacidadBytes": 2147483648,
+        "velocidadMHz": 4800,
+        "velocidadMaxMHz": 6400,
+        "fabricante": null,
+        "numeroParte": "MT62F1G32D4DR-031",
+        "numeroSerie": null,
+        "tipo": "LPDDR5",
+        "formato": "Soldada",
+        "soldado": true
+      },
+      {
+        "banco": "Motherboard",
+        "capacidadBytes": 2147483648,
+        "velocidadMHz": 4800,
+        "velocidadMaxMHz": 6400,
+        "fabricante": null,
+        "numeroParte": "MT62F1G32D4DR-031",
+        "numeroSerie": null,
+        "tipo": "LPDDR5",
+        "formato": "Soldada",
+        "soldado": true
+      },
+      {
+        "banco": "Motherboard",
+        "capacidadBytes": 2147483648,
+        "velocidadMHz": 4800,
+        "velocidadMaxMHz": 6400,
+        "fabricante": null,
+        "numeroParte": "MT62F1G32D4DR-031",
+        "numeroSerie": null,
+        "tipo": "LPDDR5",
+        "formato": "Soldada",
+        "soldado": true
+      },
+      {
+        "banco": "Motherboard",
+        "capacidadBytes": 2147483648,
+        "velocidadMHz": 4800,
+        "velocidadMaxMHz": 6400,
+        "fabricante": null,
+        "numeroParte": "MT62F1G32D4DR-031",
+        "numeroSerie": null,
+        "tipo": "LPDDR5",
+        "formato": "Soldada",
+        "soldado": true
+      }
+    ]
+  },
+  "discos": [
+    {
+      "modelo": "NVMe PC SN740 NVMe WD 1TB",
+      "numeroSerie": "SERIE-PRUEBA-9",
+      "capacidadBytes": 1024209543168,
+      "tipo": "NVMe",
+      "interfaz": "NVMe",
+      "externo": false,
+      "firmware": "73914104",
+      "salud": "Correcto"
+    }
+  ],
+  "volumenes": [
+    {
+      "letra": "C:",
+      "etiqueta": null,
+      "sistemaArchivos": "NTFS",
+      "capacidadBytes": 523022364672,
+      "libreBytes": 324073934848
+    },
+    {
+      "letra": "D:",
+      "etiqueta": null,
+      "sistemaArchivos": "NTFS",
+      "capacidadBytes": 499920138240,
+      "libreBytes": 372207390720
+    }
+  ],
+  "graficos": [
+    {
+      "nombre": "Intel(R) Iris(R) Xe Graphics",
+      "fabricante": "Intel Corporation",
+      "memoriaBytes": 2147479552,
+      "versionDriver": "32.0.101.7088",
+      "resolucion": "1920x1080",
+      "frecuenciaHz": 60
+    }
+  ],
+  "monitores": [
+    {
+      "fabricante": "AUO",
+      "modelo": null,
+      "codigoProducto": "E69B",
+      "numeroSerie": null,
+      "anioFabricacion": 2021
+    },
+    {
+      "fabricante": "SAM",
+      "modelo": "S24R35A",
+      "codigoProducto": "729F",
+      "numeroSerie": "SERIE-PRUEBA-10",
+      "anioFabricacion": 2022
+    }
+  ],
+  "red": [
+    {
+      "nombre": "Intel(R) Wi-Fi 6E AX211 160MHz",
+      "conexion": "Wi-Fi",
+      "mac": "00:00:5E:00:53:11",
+      "tipo": "Wi-Fi",
+      "conectado": true,
+      "velocidadBps": 1201000000,
+      "ips": [
+        "192.0.2.10",
+        "192.0.2.11"
+      ],
+      "dhcp": true
+    }
+  ],
+  "bateria": {
+    "nombre": "DELL M59JH35",
+    "cargaPorcentaje": 100,
+    "capacidadDisenoMWh": 86002,
+    "capacidadActualMWh": 51745,
+    "saludPorcentaje": 60
+  },
+  "antivirus": [
+    {
+      "nombre": "Windows Defender",
+      "activo": true,
+      "actualizado": true
+    }
+  ],
+  "software": [
+    {
+      "nombre": "Android Studio",
+      "version": "2026.2.2.9",
+      "editor": "Google LLC",
+      "fechaInstalacion": null
+    },
+    {
+      "nombre": "Antigravity 2.11.0",
+      "version": "2.11.0",
+      "editor": "Google",
+      "fechaInstalacion": null
+    },
+    {
+      "nombre": "Antigravity IDE (User)",
+      "version": "2.7.0",
+      "editor": "Google",
+      "fechaInstalacion": "20261117"
+    },
+    {
+      "nombre": "Aplicaciones de Microsoft 365 para empresas - es-es",
+      "version": "16.0.20625.20108",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": null
+    },
+    {
+      "nombre": "Bizagi Modeler",
+      "version": "4.2.0003",
+      "editor": "Bizagi Limited",
+      "fechaInstalacion": "20260905"
+    },
+    {
+      "nombre": "Brave",
+      "version": "158.1.100.59",
+      "editor": "Los creadores de Brave",
+      "fechaInstalacion": "20261124"
+    },
+    {
+      "nombre": "Browser for SQL Server 2019",
+      "version": "15.0.2000.5",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20260902"
+    },
+    {
+      "nombre": "Copilot",
+      "version": "158.0.4370.45",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20261126"
+    },
+    {
+      "nombre": "CPUID CPU-Z 3.01",
+      "version": "3.01",
+      "editor": "CPUID, Inc.",
+      "fechaInstalacion": "20260902"
+    },
+    {
+      "nombre": "Dell Connected Service Delivery",
+      "version": "1.1.2.0",
+      "editor": "Dell Technologies, Inc.",
+      "fechaInstalacion": "20260919"
+    },
+    {
+      "nombre": "FortiClient VPN",
+      "version": "7.4.3.4726",
+      "editor": "Fortinet Technologies Inc",
+      "fechaInstalacion": "20261005"
+    },
+    {
+      "nombre": "Fotos",
+      "version": "26.212.1029.0006",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": null
+    },
+    {
+      "nombre": "Gemini",
+      "version": "1.21.1",
+      "editor": "Google LLC",
+      "fechaInstalacion": null
+    },
+    {
+      "nombre": "Git",
+      "version": "2.55.0.3",
+      "editor": "The Git Development Community",
+      "fechaInstalacion": "20260918"
+    },
+    {
+      "nombre": "Google Chrome",
+      "version": "158.0.8127.88",
+      "editor": "Google LLC",
+      "fechaInstalacion": "20261123"
+    },
+    {
+      "nombre": "LibreOffice 26.8.2.2",
+      "version": "26.8.2.2",
+      "editor": "The Document Foundation",
+      "fechaInstalacion": "20261111"
+    },
+    {
+      "nombre": "Lightshot-5.5.0.7",
+      "version": "5.5.0.7",
+      "editor": "Skillbrains",
+      "fechaInstalacion": "20260901"
+    },
+    {
+      "nombre": "Logitech G HUB",
+      "version": "2026.7.1011216",
+      "editor": "Logitech",
+      "fechaInstalacion": null
+    },
+    {
+      "nombre": "Microsoft Edge",
+      "version": "158.0.4370.45",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20261126"
+    },
+    {
+      "nombre": "Microsoft ODBC Driver 17 for SQL Server",
+      "version": "17.5.1.1",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20260902"
+    },
+    {
+      "nombre": "Microsoft ODBC Driver 18 for SQL Server",
+      "version": "18.7.1.1",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20261116"
+    },
+    {
+      "nombre": "Microsoft OLE DB Driver 19 for SQL Server",
+      "version": "19.4.3.0",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20261116"
+    },
+    {
+      "nombre": "Microsoft OLE DB Driver for SQL Server",
+      "version": "18.3.0.0",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20260902"
+    },
+    {
+      "nombre": "Microsoft OneDrive",
+      "version": "26.212.1029.0006",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": null
+    },
+    {
+      "nombre": "Microsoft SQL Server 2012 Native Client",
+      "version": "11.4.7462.6",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20260902"
+    },
+    {
+      "nombre": "Microsoft SQL Server 2019 (64-bit)",
+      "version": null,
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": null
+    },
+    {
+      "nombre": "Microsoft SQL Server 2019 Setup (English)",
+      "version": "15.0.4013.40",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20260902"
+    },
+    {
+      "nombre": "Microsoft SQL Server 2019 T-SQL Language Service",
+      "version": "15.0.2000.5",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20260902"
+    },
+    {
+      "nombre": "Microsoft Update Health Tools",
+      "version": "3.74.0.0",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20260901"
+    },
+    {
+      "nombre": "Microsoft Visual C++ 2013 Redistributable (x86) - 12.0.30501",
+      "version": "12.0.30501.0",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": null
+    },
+    {
+      "nombre": "Microsoft Visual C++ v14 Redistributable (x64) - 14.52.37029",
+      "version": "14.52.37029.0",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": null
+    },
+    {
+      "nombre": "Microsoft Visual C++ v14 Redistributable (x86) - 14.52.37029",
+      "version": "14.52.37029.0",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": null
+    },
+    {
+      "nombre": "Microsoft Visual Studio Code (User)",
+      "version": "1.148.0",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20261127"
+    },
+    {
+      "nombre": "Microsoft Visual Studio Installer",
+      "version": "4.12.34.54489",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20261114"
+    },
+    {
+      "nombre": "Microsoft Visual Studio Tools for Applications 2017",
+      "version": "15.0.27520",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": null
+    },
+    {
+      "nombre": "Microsoft VSS Writer for SQL Server 2019",
+      "version": "15.0.2000.5",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20260902"
+    },
+    {
+      "nombre": "Microsoft Windows Application Compatibility Fix Database",
+      "version": null,
+      "editor": null,
+      "fechaInstalacion": null
+    },
+    {
+      "nombre": "Microsoft Windows Desktop Runtime 10.0.7 (x64)",
+      "version": "10.0.7.50000",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20260901"
+    },
+    {
+      "nombre": "Nitro PDF Pro",
+      "version": "14.29.1.0",
+      "editor": "Nitro",
+      "fechaInstalacion": "20260901"
+    },
+    {
+      "nombre": "Node.js",
+      "version": "24.20.0",
+      "editor": "Node.js Foundation",
+      "fechaInstalacion": "20260902"
+    },
+    {
+      "nombre": "Oracle VirtualBox 7.2.20",
+      "version": "7.2.20",
+      "editor": "Oracle and/or its affiliates",
+      "fechaInstalacion": "20260924"
+    },
+    {
+      "nombre": "PowerToys (Preview) x64",
+      "version": "0.101.2362.0",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20260904"
+    },
+    {
+      "nombre": "Python 3.15.2",
+      "version": "3.15-64",
+      "editor": "Python Software Foundation",
+      "fechaInstalacion": "20261107"
+    },
+    {
+      "nombre": "Realtek Audio Driver",
+      "version": "6.0.9954.2",
+      "editor": "Realtek Semiconductor Corp.",
+      "fechaInstalacion": "20260901"
+    },
+    {
+      "nombre": "Recuva",
+      "version": "1.53",
+      "editor": "Piriform",
+      "fechaInstalacion": null
+    },
+    {
+      "nombre": "RustDesk",
+      "version": "1.5.3.29903684",
+      "editor": "Purslane Tech Pte. Ltd.",
+      "fechaInstalacion": "20261113"
+    },
+    {
+      "nombre": "scrcpy",
+      "version": "5.0.1",
+      "editor": "Genymobile",
+      "fechaInstalacion": "20261118"
+    },
+    {
+      "nombre": "Sistema de Gestion Empresarial Grupecsac",
+      "version": null,
+      "editor": null,
+      "fechaInstalacion": null
+    },
+    {
+      "nombre": "SQL Server Management Studio 22",
+      "version": "22.12.0",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20261116"
+    },
+    {
+      "nombre": "StarUML 7.1.1",
+      "version": "7.1.1",
+      "editor": "MKLabs Co.,Ltd.",
+      "fechaInstalacion": null
+    },
+    {
+      "nombre": "Update for x64-based Windows Systems (KB5001716)",
+      "version": "8.94.0.0",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20260901"
+    },
+    {
+      "nombre": "vs_CoreEditorFonts",
+      "version": "17.7.40001",
+      "editor": "Microsoft Corporation",
+      "fechaInstalacion": "20261116"
+    },
+    {
+      "nombre": "WinRAR 7.23 (64-bit)",
+      "version": "7.23.0",
+      "editor": "win.rar GmbH",
+      "fechaInstalacion": null
+    }
+  ],
+  "advertencias": [],
+  "agenteVersion": "1.1.0",
+  "fechaRecoleccion": "2026-11-27T12:43:20.2426205Z"
+}

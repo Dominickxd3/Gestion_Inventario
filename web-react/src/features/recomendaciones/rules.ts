@@ -1,5 +1,6 @@
 import type { Inventario } from '../../types/api';
 import { espacio, memoria as fmtMemoria, plural } from '../../lib/formato';
+import { analizarMemoria } from '../../lib/memoria';
 import { porcentajeLibre } from '../diagnostico/rules';
 import { UMBRALES as U } from '../diagnostico/umbrales';
 
@@ -47,18 +48,20 @@ export function recomendar(inv: Inventario, ahora = Date.now()): Recomendacion[]
 
   const ram = inv.memoria?.instaladaBytes;
   if (ram && ram < U.memoriaMinimaGB * GIB) {
-    const libres = (inv.memoria?.ranurasTotales ?? 0) - (inv.memoria?.ranurasUsadas ?? 0);
+    const a = analizarMemoria(inv.memoria!);
     r.push({
       id: 'ram',
       prioridad: 'alta',
-      titulo: 'Ampliar la memoria RAM',
+      titulo: a.soldada === 'total' ? 'Memoria RAM insuficiente' : 'Ampliar la memoria RAM',
       detalle:
         `Tiene ${fmtMemoria(ram)}; se recomiendan al menos ${U.memoriaMinimaGB} GB. ` +
-        (inv.memoria?.ranurasTotales == null
-          ? 'No se pudo determinar si hay ranuras libres.'
-          : libres > 0
-            ? `Hay ${plural(libres, 'ranura libre', 'ranuras libres')}.`
-            : 'Todas las ranuras están ocupadas: habría que reemplazar módulos.'),
+        (a.soldada === 'total'
+          ? 'La memoria va soldada a la placa y no se puede ampliar: habría que reemplazar el equipo.'
+          : a.ranurasLibres == null
+            ? 'No se pudo determinar si hay ranuras libres.'
+            : a.ranurasLibres > 0
+              ? `Hay ${plural(a.ranurasLibres, 'ranura libre', 'ranuras libres')}.`
+              : 'Todas las ranuras están ocupadas: habría que reemplazar módulos.'),
       basadoEn: 'Memoria › capacidad instalada y ranuras',
     });
   }

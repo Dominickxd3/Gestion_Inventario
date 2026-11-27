@@ -1,3 +1,4 @@
+import { PanelGestion } from './PanelGestion';
 import { CircleCheck, Clock, ScanSearch } from 'lucide-react';
 import { useEquipos } from '../../hooks/EquiposContext';
 import { useAhora } from '../../hooks/useAhora';
@@ -16,6 +17,7 @@ export function InicioPage() {
   const { equipos, estadisticas, cargando, error, recargar } = useEquipos();
   const ahora = useAhora();
   const { diagnosticoDe, listo } = useDiagnosticos(equipos);
+
 
   const accion = (
     <Button variante="primario" icono={ScanSearch} a="/detectar">
@@ -36,6 +38,7 @@ export function InicioPage() {
     return (
       <>
         <PageHeader titulo="Inicio" />
+        <PanelGestion />
         <EmptyState
           icono={ScanSearch}
           titulo="Aún no hay equipos registrados"
@@ -61,7 +64,9 @@ export function InicioPage() {
 
   return (
     <>
-      <PageHeader titulo="Inicio" subtitulo="Resumen del inventario de equipos" acciones={accion} />
+      <PageHeader titulo="Inicio" subtitulo="Inventario de activos y equipos detectados" acciones={accion} />
+      <PanelGestion />
+      <h2 className="titulo-bloque">Equipos detectados por ScanGP</h2>
 
       <StatRow>
         <StatFigure valor={estadisticas?.total ?? equipos.length} etiqueta="Equipos registrados" />

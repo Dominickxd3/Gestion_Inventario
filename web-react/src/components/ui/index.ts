@@ -11,3 +11,5 @@ export { Meter } from './Meter';
 export { LoadingState, ErrorState, EmptyState } from './States';
 export { SpecTable, type Columna } from './SpecTable';
 export { DeviceTypeIcon } from './DeviceTypeIcon';
+export { TextField, SelectField } from './FormField';
+export { SidePanel } from './SidePanel';

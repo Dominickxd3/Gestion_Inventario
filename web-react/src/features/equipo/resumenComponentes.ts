@@ -1,5 +1,6 @@
 import type { Inventario } from '../../types/api';
 import { capacidad, memoria, plural, unir } from '../../lib/formato';
+import { analizarMemoria } from '../../lib/memoria';
 
 /** Resúmenes de una línea por componente (lenguaje claro), reutilizados en Resumen. */
 export function resumenProcesador(inv: Inventario) {
@@ -12,10 +13,15 @@ export function resumenMemoria(inv: Inventario) {
   const m = inv.memoria;
   if (!m?.instaladaBytes) return null;
   const tipo = m.modulos.find((x) => x.tipo)?.tipo;
+  const a = analizarMemoria(m);
   return unir(
     [
       unir([memoria(m.instaladaBytes), tipo]),
-      m.ranurasTotales ? `${m.ranurasUsadas} de ${m.ranurasTotales} ranuras ocupadas` : null,
+      a.soldada === 'total'
+        ? 'soldada (no ampliable)'
+        : a.ranurasTotales
+          ? `${a.ranurasUsadas} de ${a.ranurasTotales} ranuras ocupadas`
+          : null,
     ],
     ' · ',
   );

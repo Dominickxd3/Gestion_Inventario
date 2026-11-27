@@ -28,6 +28,22 @@ export function DetectarPage() {
   const archivo = info.data?.nombreArchivo ?? 'ScanGP-Registrar-Equipo.exe';
   const esperaLarga = descargado && !vinculado && ahora - desde.current > ESPERA_LARGA_MS;
 
+  // La descarga necesita el token de sesión: se hace con fetch en vez de un enlace directo.
+  const [descargando, setDescargando] = useState(false);
+  const [errorDescarga, setErrorDescarga] = useState<string | null>(null);
+  const descargar = async () => {
+    setDescargando(true);
+    setErrorDescarga(null);
+    try {
+      await scangpService.descargar(archivo);
+      setDescargado(true);
+    } catch (e) {
+      setErrorDescarga((e as Error).message);
+    } finally {
+      setDescargando(false);
+    }
+  };
+
   return (
     <div className="asistente">
       <PageHeader
@@ -55,13 +71,18 @@ export function DetectarPage() {
               <div className="fila-accion">
                 <Button
                   variante={descargado ? 'secundario' : 'primario'}
-                  icono={Download}
-                  href={scangpService.urlDescarga}
-                  onClick={() => setDescargado(true)}
+                  icono={descargando ? LoaderCircle : Download}
+                  disabled={descargando}
+                  onClick={descargar}
                 >
-                  {descargado ? 'Descargar de nuevo' : 'Descargar ScanGP'}
+                  {descargando ? 'Descargando…' : descargado ? 'Descargar de nuevo' : 'Descargar ScanGP'}
                 </Button>
-                {info.data && (
+                {errorDescarga && (
+                  <span className="campo-error" role="alert">
+                    {errorDescarga}
+                  </span>
+                )}
+                {info.data && !errorDescarga && (
                   <span className="texto-terciario">
                     {unir([archivo, info.data.tamanoBytes && `${Math.round(info.data.tamanoBytes / 1024)} KB`], ' · ')}
                   </span>

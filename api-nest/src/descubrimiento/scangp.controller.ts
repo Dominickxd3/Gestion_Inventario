@@ -4,13 +4,14 @@ import { Response } from 'express';
 import { existsSync, promises as fs, statSync } from 'fs';
 import { networkInterfaces } from 'os';
 import * as path from 'path';
+import { Roles } from '../identidad/decoradores';
 
 const NOMBRE_DESCARGA = 'ScanGP.exe';
 
 /**
  * Entrega ScanGP.exe ya configurado: se le agrega al final un bloque con la URL del servidor
  * y la clave, así el usuario solo hace doble clic.
- * TODO: proteger con el login de la web (la descarga contiene la API key).
+ * Requiere sesión: la descarga contiene la API key, por eso solo ADMIN y TECNICO pueden descargarlo.
  */
 @Controller('scangp')
 export class ScanGpController {
@@ -29,6 +30,7 @@ export class ScanGpController {
     };
   }
 
+  @Roles('ADMIN', 'TECNICO')
   @Get('descargar')
   async descargar(@Res() res: Response) {
     const exe = this.rutaExe();

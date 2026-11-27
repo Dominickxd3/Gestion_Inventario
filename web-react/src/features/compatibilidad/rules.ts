@@ -1,6 +1,7 @@
 import type { Inventario } from '../../types/api';
 import type { Comprobacion } from '../../lib/estados';
-import { plural, unir } from '../../lib/formato';
+import { memoria as fmtMemoria, plural, unir } from '../../lib/formato';
+import { analizarMemoria } from '../../lib/memoria';
 
 export interface GrupoCompatibilidad {
   id: string;
@@ -13,12 +14,20 @@ const distintos = <T,>(l: T[]) => [...new Set(l.filter((x) => x != null && x !==
 function memoria(inv: Inventario): Comprobacion[] {
   const m = inv.memoria;
   const modulos = m?.modulos ?? [];
+  const a = m ? analizarMemoria(m) : null;
   const tipos = distintos(modulos.map((x) => x.tipo));
-  const formatos = distintos(modulos.map((x) => x.formato));
+  const formatos = distintos((a?.extraibles ?? modulos).map((x) => x.formato));
   const velocidades = distintos(modulos.map((x) => x.velocidadMHz));
   const r: Comprobacion[] = [];
 
-  if (tipos.length === 1) {
+  if (a?.soldada === 'total') {
+    r.push({
+      id: 'ram-tipo',
+      titulo: 'Tipo de memoria',
+      estado: 'aviso',
+      detalle: `${unir(['Memoria', tipos.length === 1 && tipos[0]])} soldada a la placa: no admite módulos adicionales ni se puede reemplazar.`,
+    });
+  } else if (tipos.length === 1) {
     r.push({
       id: 'ram-tipo',
       titulo: 'Tipo de memoria',
@@ -31,16 +40,20 @@ function memoria(inv: Inventario): Comprobacion[] {
     r.push({ id: 'ram-tipo', titulo: 'Tipo de memoria', estado: 'desconocido', detalle: 'Los módulos no informan su tipo (habitual en memoria soldada).' });
   }
 
-  if (m?.ranurasTotales != null && m.ranurasUsadas != null) {
-    const libres = m.ranurasTotales - m.ranurasUsadas;
+  if (a?.soldada === 'total') {
+    r.push({ id: 'ram-ranuras', titulo: 'Ranuras libres', estado: 'aviso', detalle: 'El equipo no tiene ranuras de memoria.' });
+  } else if (a?.ranurasTotales != null && a.ranurasLibres != null) {
+    const libres = a.ranurasLibres;
+    const soldadaTxt = a.soldada === 'parcial' ? ` Además tiene ${fmtMemoria(a.capacidadSoldadaBytes)} soldada a la placa.` : '';
     r.push({
       id: 'ram-ranuras',
       titulo: 'Ranuras libres',
       estado: libres > 0 ? 'ok' : 'aviso',
       detalle:
-        libres > 0
-          ? `${libres} de ${m.ranurasTotales} disponibles para ampliar.`
-          : `Las ${m.ranurasTotales} ranuras están ocupadas; para ampliar hay que reemplazar módulos.`,
+        (libres > 0
+          ? `${libres} de ${a.ranurasTotales} disponibles para ampliar.`
+          : `${a.ranurasTotales === 1 ? 'La ranura está ocupada' : `Las ${a.ranurasTotales} ranuras están ocupadas`}; para ampliar hay que reemplazar módulos.`) +
+        soldadaTxt,
     });
   } else {
     r.push({ id: 'ram-ranuras', titulo: 'Ranuras libres', estado: 'desconocido', detalle: 'La placa no informa el número de ranuras.' });

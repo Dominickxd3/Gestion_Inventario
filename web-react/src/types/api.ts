@@ -31,6 +31,9 @@ export interface EquipoListado {
   ipOrigen: string | null;
   cambiosRecientes: number;
   resumen: ResumenEquipo;
+  /** Activo validado al que está vinculado (null = detectado sin registrar). */
+  activoId?: string | null;
+  codigoPatrimonial?: string | null;
 }
 
 export interface CambioHistorial {
@@ -43,6 +46,8 @@ export interface CambioHistorial {
 export interface EquipoDetalle extends Omit<EquipoListado, 'cambiosRecientes'> {
   historial: CambioHistorial[];
   inventario: Inventario;
+  escaneos?: { id: string; recibidoEn: string; agenteVersion: string | null }[];
+  activo?: { id: string; codigoPatrimonial: string; nombre: string } | null;
 }
 
 export interface Estadisticas {
@@ -121,6 +126,8 @@ export interface InvModuloRam {
   numeroSerie: N<string>;
   tipo: N<string>;
   formato: N<string>;
+  /** Soldado a la placa (ScanGP 2026-11+). Ausente en reportes antiguos. */
+  soldado?: N<boolean>;
 }
 
 export interface InvMemoria {

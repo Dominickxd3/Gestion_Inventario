@@ -4,6 +4,7 @@ import { estimarEstacionDeTrabajo, formatoChasis, infoTipo } from '../../lib/tip
 import { haceCuanto, unir, usuarioCorto } from '../../lib/formato';
 import { diagnosticar, resumirDiagnostico } from '../diagnostico/rules';
 import type { EquipoDetalle } from '../../types/api';
+import { AccionActivoDetectado } from './RegistrarActivo';
 
 export function EquipoHeader({ equipo }: { equipo: EquipoDetalle }) {
   const ahora = useAhora();
@@ -40,10 +41,13 @@ export function EquipoHeader({ equipo }: { equipo: EquipoDetalle }) {
         </>
       }
       acciones={
-        <StatusBadge
-          estado={diag.estado}
-          texto={diag.estado === 'ok' ? 'Sin problemas' : diag.problemas ? `${diag.problemas} con problema` : `${diag.avisos} advertencias`}
-        />
+        <div className="acciones-pagina">
+          <StatusBadge
+            estado={diag.estado}
+            texto={diag.estado === 'ok' ? 'Sin problemas' : diag.problemas ? `${diag.problemas} con problema` : `${diag.avisos} advertencias`}
+          />
+          <AccionActivoDetectado equipo={equipo} />
+        </div>
       }
     />
   );

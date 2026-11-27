@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { Button } from '../ui';
-import { Marca, NavPrincipal } from './Sidebar';
+import { Marca, NavPrincipal, UsuarioPie } from './Sidebar';
 import { EstadoConexionPie } from './EstadoConexionPie';
 
 /** Barra superior + menú a pantalla completa para móvil (< 768 px). */
@@ -33,6 +33,7 @@ export function MobileNav() {
         <div className="nav-movil-panel">
           <NavPrincipal onNavegar={() => setAbierto(false)} />
           <EstadoConexionPie />
+          <UsuarioPie />
         </div>
       )}
     </div>

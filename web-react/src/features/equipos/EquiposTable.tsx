@@ -48,6 +48,20 @@ export function EquiposTable({ equipos, diagnosticoDe }: Props) {
         )}
       />
       <Column
+        header="Activo"
+        field="codigoPatrimonial"
+        sortable
+        body={(e: EquipoListado) =>
+          e.activoId ? (
+            <Link to={`/activos/${e.activoId}`} className="mono" onClick={(ev) => ev.stopPropagation()}>
+              {e.codigoPatrimonial}
+            </Link>
+          ) : (
+            <span className="texto-terciario">Sin registrar</span>
+          )
+        }
+      />
+      <Column
         header="Tipo"
         field="resumen.tipo"
         sortable

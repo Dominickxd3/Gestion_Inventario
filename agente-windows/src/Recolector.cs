@@ -269,6 +269,7 @@ namespace InventarioAgente
             ManagementBaseObject cs = Wmi.Primero("SELECT TotalPhysicalMemory FROM Win32_ComputerSystem");
             List<object> modulos = new List<object>();
             long instalada = 0;
+            int soldados = 0;
 
             foreach (ManagementBaseObject m in Wmi.Consultar("SELECT * FROM Win32_PhysicalMemory"))
             {
@@ -282,8 +283,13 @@ namespace InventarioAgente
                 r["fabricante"] = Texto.Limpiar(Wmi.Str(m, "Manufacturer"));
                 r["numeroParte"] = Texto.Limpiar(Wmi.Str(m, "PartNumber"));
                 r["numeroSerie"] = Texto.Limpiar(Wmi.Str(m, "SerialNumber"));
-                r["tipo"] = TipoMemoria(Wmi.Int(m, "SMBIOSMemoryType"));
-                r["formato"] = FormatoMemoria(Wmi.Int(m, "FormFactor"));
+                string tipo = TipoMemoria(Wmi.Int(m, "SMBIOSMemoryType"));
+                string formato = FormatoMemoria(Wmi.Int(m, "FormFactor"));
+                bool soldado = EsMemoriaSoldada(tipo, formato, r["banco"] as string);
+                r["tipo"] = tipo;
+                r["formato"] = soldado && formato == null ? "Soldada" : formato;
+                r["soldado"] = soldado;
+                if (soldado) soldados++;
                 modulos.Add(r);
             }
 
@@ -291,11 +297,18 @@ namespace InventarioAgente
             foreach (ManagementBaseObject a in Wmi.Consultar("SELECT MemoryDevices FROM Win32_PhysicalMemoryArray"))
                 ranuras += Wmi.Int(a, "MemoryDevices") ?? 0;
 
+            // La BIOS cuenta cada chip/canal soldado como un "dispositivo": solo se cuentan ranuras reales.
+            int extraibles = modulos.Count - soldados;
+            object ranurasTotales;
+            if (extraibles == 0 && soldados > 0) ranurasTotales = 0;
+            else if (ranuras > 0) ranurasTotales = Math.Max(0, ranuras - soldados);
+            else ranurasTotales = null;
+
             Dictionary<string, object> res = new Dictionary<string, object>();
             res["instaladaBytes"] = instalada;
             res["utilizableBytes"] = Wmi.Long(cs, "TotalPhysicalMemory");
-            res["ranurasTotales"] = ranuras > 0 ? (object)ranuras : null;
-            res["ranurasUsadas"] = modulos.Count;
+            res["ranurasTotales"] = ranurasTotales;
+            res["ranurasUsadas"] = extraibles;
             res["modulos"] = modulos;
             return res;
         }
@@ -317,6 +330,15 @@ namespace InventarioAgente
                 case 35: return "LPDDR5";
                 default: return null;
             }
+        }
+
+        // LPDDR siempre va soldada; DIMM/SODIMM siempre es extraíble; si no, se mira la ubicación que informa la BIOS.
+        static bool EsMemoriaSoldada(string tipo, string formato, string banco)
+        {
+            if (tipo != null && tipo.StartsWith("LPDDR")) return true;
+            if (formato == "DIMM" || formato == "SODIMM") return false;
+            return banco != null && System.Text.RegularExpressions.Regex.IsMatch(
+                banco, "motherboard|system ?board|on-?board|soldered", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         }
 
         static string FormatoMemoria(int? f)
