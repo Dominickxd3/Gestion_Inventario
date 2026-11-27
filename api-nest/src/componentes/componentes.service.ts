@@ -276,6 +276,11 @@ export class ComponentesService {
           entidad: 'ACTIVO', entidadId: origen.id, tipo: 'RETIRO', motivo: 'REASIGNACION',
           descripcion: `El componente ${c.codigo} pasó a otro equipo`, observacion, referencia: { tipo: 'COMPONENTE', id: c.id },
         });
+        await this.trazabilidad.registrar(em, actor, {
+          entidad: 'COMPONENTE', entidadId: c.id, tipo: 'RETIRO', motivo: 'REASIGNACION',
+          descripcion: `Retirado de ${origen.codigoPatrimonial} ${origen.nombre} por traslado`,
+          observacion, referencia: { tipo: 'ACTIVO', id: origen.id },
+        });
         c.situacion = 'EN_ALMACEN';
         await em.save(c);
       }

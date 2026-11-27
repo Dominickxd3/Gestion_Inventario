@@ -8,6 +8,8 @@ import { Actor } from './common/dominio';
 import { BajaComponenteDto, CrearComponenteDto, DatosComponenteDto, InstalarDto, ReingresarDto, RetirarDto } from './componentes/componentes.dto';
 import { ComponentesService } from './componentes/componentes.service';
 import { DetectadosService, EquiposController } from './descubrimiento/equipos.controller';
+import { CompletarDetectadosService } from './descubrimiento/completar-detectados.service';
+import { RegistroAutomaticoService } from './descubrimiento/registro-automatico.service';
 import { IngestaService } from './descubrimiento/ingesta.service';
 import { ReconciliacionService } from './descubrimiento/reconciliacion.service';
 import { ScanGpController } from './descubrimiento/scangp.controller';
@@ -135,7 +137,7 @@ export class PanelController {
   ],
   providers: [
     TrazabilidadService, ActivosService, ComponentesService, AsignacionesService, MantenimientoService,
-    IngestaService, ReconciliacionService, DetectadosService,
+    IngestaService, ReconciliacionService, DetectadosService, RegistroAutomaticoService, CompletarDetectadosService,
   ],
 })
 export class GestionModule {}

@@ -75,7 +75,7 @@ export function InicioPage() {
         ))}
       </StatRow>
 
-      <Section titulo="Requieren atención" descripcion="Según el último reporte de cada equipo">
+      <Section titulo="Salud de los equipos" descripcion="Problemas detectados por ScanGP en el último reporte de cada equipo">
         {!listo && atencion.length === 0 ? (
           <LoadingState filas={3} etiqueta="Analizando equipos" />
         ) : atencion.length === 0 ? (
@@ -98,7 +98,7 @@ export function InicioPage() {
         )}
       </Section>
 
-      <Section titulo="Actividad reciente" descripcion="Últimos equipos que enviaron su inventario">
+      <Section titulo="Últimos reportes de ScanGP" descripcion="Equipos que enviaron su inventario más recientemente">
         <ListaEquipos>
           {recientes.map((e) => (
             <EquipoFila

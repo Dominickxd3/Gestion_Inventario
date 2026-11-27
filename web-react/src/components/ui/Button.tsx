@@ -17,12 +17,14 @@ interface Props {
   /** submit para enviar formularios. */
   tipo?: 'button' | 'submit';
   'aria-label'?: string;
+  /** Texto de ayuda al pasar el ratón (botones de solo icono). */
+  titulo?: string;
   className?: string;
   children?: ReactNode;
 }
 
 /** Botón del sistema. Se renderiza como <button>, <Link> o <a> según las props. */
-export function Button({ variante = 'secundario', icono, a, href, onClick, disabled, tipo = 'button', className = '', children, ...aria }: Props) {
+export function Button({ variante = 'secundario', icono, a, href, onClick, disabled, tipo = 'button', className = '', titulo, children, ...aria }: Props) {
   const clase = ['boton', `boton-${variante}`, !children && 'boton-solo-icono', className].filter(Boolean).join(' ');
   const contenido = (
     <>
@@ -32,7 +34,7 @@ export function Button({ variante = 'secundario', icono, a, href, onClick, disab
   );
   if (a) {
     return (
-      <Link to={a} className={clase} onClick={onClick} {...aria}>
+      <Link to={a} className={clase} onClick={onClick} title={titulo} {...aria}>
         {contenido}
       </Link>
     );
@@ -45,7 +47,7 @@ export function Button({ variante = 'secundario', icono, a, href, onClick, disab
     );
   }
   return (
-    <button type={tipo} className={clase} onClick={onClick} disabled={disabled} {...aria}>
+    <button type={tipo} className={clase} onClick={onClick} disabled={disabled} title={titulo} {...aria}>
       {contenido}
     </button>
   );

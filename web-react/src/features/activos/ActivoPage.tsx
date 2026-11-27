@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeftRight, Boxes, LogOut, MapPin, Pencil, Stethoscope, Trash2, UserPlus, Wrench } from 'lucide-react';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { ArrowLeftRight, Boxes, LogOut, MapPin, Pencil, Power, PowerOff, ScanSearch, Stethoscope, Trash2, User, UserPlus, Wrench } from 'lucide-react';
 import { Button, EmptyState, ErrorState, LoadingState, PageHeader } from '../../components/ui';
+import { MenuMas, PestanasFicha, ResumenFicha, type AccionMenu } from '../../components/ficha/Ficha';
 import { usePolling } from '../../hooks/usePolling';
 import { useSesion } from '../../hooks/SesionContext';
 import { useAhora } from '../../hooks/useAhora';
 import { api } from '../../services/gestion.service';
-import { haceCuanto, unir } from '../../lib/formato';
+import { fecha, haceCuanto, unir } from '../../lib/formato';
 import { et, type ActivoDetalle } from '../../types/gestion';
 import { EstadoPunto } from '../gestion/comun';
 import { ActivoAcciones, type AccionActivo } from './ActivoAcciones';
@@ -48,22 +49,28 @@ export function ActivoPage() {
 
   return (
     <>
-      <PageHeader
-        migas={[{ etiqueta: 'Activos', a: '/activos' }, { etiqueta: a.codigoPatrimonial }]}
-        titulo={<>{a.nombre} <span className="texto-terciario mono">{a.codigoPatrimonial}</span></>}
-        subtitulo={unir([a.tipo.nombre, unir([a.marca, a.modelo]), a.numeroSerie && `Serie ${a.numeroSerie}`], ' · ')}
-        acciones={<Acciones a={a} abrir={setAccion} />}
-      />
-      <BarraEstados a={a} />
+      <div className="ficha-cabecera">
+        <PageHeader
+          migas={[{ etiqueta: 'Activos', a: '/activos' }, { etiqueta: a.codigoPatrimonial }]}
+          titulo={<>{a.nombre} <span className="codigo-chip">{a.codigoPatrimonial}</span></>}
+          subtitulo={
+            <span className="ficha-subtitulo">
+              <span>{a.tipo.nombre}</span>
+              {unir([a.marca, a.modelo]) && <><span className="separador">·</span><span>{unir([a.marca, a.modelo])}</span></>}
+              <span className="separador">·</span>
+              {a.numeroSerie ? <span>Serie <span className="mono">{a.numeroSerie}</span></span> : <span className="texto-terciario">Sin número de serie</span>}
+            </span>
+          }
+          acciones={<Acciones a={a} abrir={setAccion} />}
+        />
+      </div>
+      <Resumen a={a} />
 
-      <nav className="pestanas" aria-label="Secciones del activo">
-        {PESTANAS.map(([clave, nombre]) => (
-          <Link key={clave} to={`?tab=${clave}`} replace className={tab === clave ? 'activo' : undefined}>
-            {nombre}
-            {clave === 'deteccion' && a.discrepanciasPendientes > 0 && <span className="contador">{a.discrepanciasPendientes}</span>}
-          </Link>
-        ))}
-      </nav>
+      <PestanasFicha
+        etiqueta="Secciones del activo"
+        actual={tab}
+        pestanas={PESTANAS.map(([clave, nombre]) => ({ clave, nombre, contador: clave === 'deteccion' ? a.discrepanciasPendientes : undefined }))}
+      />
 
       <div key={version}>
         {tab === 'general' && <TabGeneral a={a} />}
@@ -81,45 +88,50 @@ export function ActivoPage() {
   );
 }
 
-function BarraEstados({ a }: { a: ActivoDetalle }) {
+/** Resumen: quién lo tiene, dónde está, en qué estado y si ScanGP lo ve al día. */
+function Resumen({ a }: { a: ActivoDetalle }) {
   const ahora = useAhora(60_000);
+  const asig = a.asignacion;
   return (
-    <div className="barra-estados">
-      <span><span className="etq">Ciclo de vida</span> <EstadoPunto valor={a.cicloVida} /></span>
-      <span><span className="etq">Técnico</span> <EstadoPunto valor={a.estadoTecnico} /></span>
-      <span>
-        <span className="etq">Asignación</span>{' '}
-        {a.asignacion ? (
-          a.asignacion.personaId
-            ? <Link to={`/personas/${a.asignacion.personaId}`}>{a.asignacion.responsable}</Link>
-            : a.asignacion.responsable
-        ) : 'Disponible'}
-        {a.asignacion && a.asignacion.tipo !== 'PERMANENTE' && ` (${et(a.asignacion.tipo).toLowerCase()} hasta ${a.asignacion.hastaPrevisto})`}
-      </span>
-      <span><span className="etq">Ubicación</span> {a.ubicacionNombre ?? 'Sin ubicación'}</span>
-      <span>
-        <span className="etq">ScanGP</span> <EstadoPunto valor={a.sincronizacion} />
-        {a.ultimoReporte && <span className="texto-terciario">· {haceCuanto(a.ultimoReporte, ahora)}</span>}
-      </span>
-      {a.ordenAbierta && (
-        <span>
-          <span className="etq">Mantenimiento</span> <Link to={`/mantenimiento/${a.ordenAbierta.id}`}>{a.ordenAbierta.codigo}</Link>
-        </span>
-      )}
-    </div>
+    <ResumenFicha
+      datos={[
+        asig
+          ? {
+              etiqueta: 'Asignado a', icono: User, destacado: true,
+              a: asig.personaId ? `/personas/${asig.personaId}` : undefined,
+              valor: asig.responsable ?? '—',
+              detalle: asig.tipo === 'PERMANENTE' ? 'Sin fecha de devolución' : `${et(asig.tipo)} hasta ${fecha(asig.hastaPrevisto)}`,
+            }
+          : { etiqueta: 'Asignación', icono: User, destacado: true, valor: 'Disponible', detalle: 'Nadie lo tiene asignado' },
+        { etiqueta: 'Ubicación', icono: MapPin, valor: a.ubicacionNombre ?? <span className="texto-terciario">Sin ubicación</span> },
+        { etiqueta: 'Estado técnico', icono: Stethoscope, valor: <EstadoPunto valor={a.estadoTecnico} />, detalle: <>Ciclo: {et(a.cicloVida)}</> },
+        a.ordenAbierta
+          ? { etiqueta: 'En mantenimiento', icono: Wrench, a: `/mantenimiento/${a.ordenAbierta.id}`, valor: a.ordenAbierta.codigo, detalle: 'Ver la orden abierta' }
+          : { etiqueta: 'ScanGP', icono: ScanSearch, valor: <EstadoPunto valor={a.sincronizacion} />, detalle: a.ultimoReporte ? `Último reporte ${haceCuanto(a.ultimoReporte, ahora)}` : 'Sin reportes' },
+      ]}
+    />
   );
 }
 
+/** Cabecera: la acción del momento en primario, las de uso diario visibles y el resto en "Más acciones". */
 function Acciones({ a, abrir }: { a: ActivoDetalle; abrir: (x: AccionActivo) => void }) {
   const { puede } = useSesion();
   if (!puede('ADMIN', 'TECNICO') || a.cicloVida === 'DADO_DE_BAJA') return null;
   const enServicio = a.cicloVida === 'EN_SERVICIO';
+  const mas: AccionMenu[] = [
+    { etiqueta: 'Cambiar estado técnico', icono: Stethoscope, onClick: () => abrir('estado') },
+    { etiqueta: 'Cambiar ubicación', icono: MapPin, onClick: () => abrir('ubicacion') },
+    enServicio
+      ? { etiqueta: 'Poner fuera de servicio', icono: PowerOff, onClick: () => abrir('fuera') }
+      : { etiqueta: 'Poner en servicio', icono: Power, onClick: () => abrir('servicio') },
+    ...(puede('ADMIN') ? [{ etiqueta: 'Dar de baja', icono: Trash2, peligro: true, onClick: () => abrir('baja') }] : []),
+  ];
   return (
     <div className="acciones-pagina">
       {a.asignacion ? (
         <>
-          <Button icono={ArrowLeftRight} onClick={() => abrir('transferir')}>Transferir</Button>
-          <Button icono={LogOut} onClick={() => abrir('devolver')}>Devolución</Button>
+          <Button variante="primario" icono={ArrowLeftRight} onClick={() => abrir('transferir')}>Transferir</Button>
+          <Button icono={LogOut} onClick={() => abrir('devolver')}>Registrar devolución</Button>
         </>
       ) : (
         enServicio && !a.ordenAbierta && <Button variante="primario" icono={UserPlus} onClick={() => abrir('asignar')}>Asignar</Button>
@@ -129,11 +141,8 @@ function Acciones({ a, abrir }: { a: ActivoDetalle; abrir: (x: AccionActivo) => 
       ) : (
         <Button icono={Wrench} onClick={() => abrir('mantenimiento')}>Mantenimiento</Button>
       )}
-      <Button icono={Stethoscope} onClick={() => abrir('estado')}>Estado técnico</Button>
-      <Button icono={MapPin} onClick={() => abrir('ubicacion')}>Ubicación</Button>
       <Button icono={Pencil} onClick={() => abrir('editar')}>Editar</Button>
-      {enServicio ? <Button variante="fantasma" onClick={() => abrir('fuera')}>Fuera de servicio</Button> : <Button variante="fantasma" onClick={() => abrir('servicio')}>Poner en servicio</Button>}
-      {puede('ADMIN') && <Button variante="fantasma" icono={Trash2} onClick={() => abrir('baja')}>Dar de baja</Button>}
+      <MenuMas acciones={mas} />
     </div>
   );
 }

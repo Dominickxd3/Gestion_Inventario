@@ -1,0 +1,297 @@
+/* Tabla CRUD común (DESIGN.md §4.1): barra superior + tabla densa + acciones por fila. */
+.tabla-crud {
+  display: grid;
+  gap: var(--space-3);
+}
+.tabla-crud-barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  min-height: var(--toolbar-height, 40px);
+}
+.tabla-crud-barra .form-campo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.tabla-crud-barra .form-campo .campo-etiqueta {
+  color: var(--color-text-tertiary);
+  font-weight: 400;
+  white-space: nowrap;
+}
+.tabla-crud-barra .campo-control {
+  min-height: 32px;
+  width: auto;
+}
+.caja-busqueda {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1 1 240px;
+  max-width: 340px;
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text-tertiary);
+}
+.caja-busqueda:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: var(--focus-ring);
+}
+.caja-busqueda input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: var(--text-body);
+}
+.tabla-crud-total {
+  margin-left: auto;
+  font: var(--text-caption);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+/* Tabla densa */
+.tabla-densa.p-datatable {
+  border: var(--border-hairline);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.tabla-densa.p-datatable .p-datatable-thead > tr > th {
+  padding: 0 var(--space-3);
+  height: 36px;
+  background: var(--color-bg-subtle);
+  border-bottom: var(--border-hairline);
+  color: var(--color-text-secondary);
+  font: 500 12px/16px var(--font-sans);
+  white-space: nowrap;
+}
+.tabla-densa.p-datatable .p-datatable-tbody > tr > td {
+  padding: 0 var(--space-3);
+  height: var(--row-height-compact);
+  border-bottom: var(--border-hairline);
+  font: var(--text-table, 400 13px/18px var(--font-sans));
+  vertical-align: middle;
+}
+.tabla-densa.p-datatable .p-datatable-tbody > tr:last-child > td {
+  border-bottom: 0;
+}
+.tabla-densa.p-datatable .p-datatable-tbody > tr.fila-clicable {
+  cursor: pointer;
+}
+.tabla-densa.p-datatable .p-datatable-tbody > tr:hover > td {
+  background: var(--color-bg-subtle);
+}
+.tabla-densa .mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+/* Una línea por celda: los textos largos se recortan con "…" (el valor completo va en el título). */
+.tabla-densa.p-datatable .p-datatable-tbody > tr > td.col-linea {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tabla-densa.p-datatable .p-datatable-tbody > tr > td.col-envolver {
+  min-width: 200px;
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+.tabla-densa.p-datatable .p-datatable-emptymessage > td {
+  height: auto;
+  padding: var(--space-7) var(--space-4);
+  text-align: center;
+  color: var(--color-text-tertiary);
+}
+.tabla-densa .col-acciones {
+  text-align: center;
+  white-space: nowrap;
+}
+/* Encabezado "Acciones" e iconos centrados en su columna. */
+.tabla-densa.p-datatable .p-datatable-thead > tr > th.col-acciones .p-column-header-content {
+  justify-content: center;
+}
+/* Si la tabla no cabe y se desplaza, las acciones quedan fijas a la derecha y siempre visibles. */
+.tabla-densa.p-datatable .p-datatable-tbody > tr > td.col-acciones,
+.tabla-densa.p-datatable .p-datatable-thead > tr > th.col-acciones {
+  position: sticky;
+  right: 0;
+  z-index: 1;
+  background: var(--color-bg);
+  box-shadow: -1px 0 0 var(--color-border);
+}
+.tabla-densa.p-datatable .p-datatable-thead > tr > th.col-acciones,
+.tabla-densa.p-datatable .p-datatable-tbody > tr:hover > td.col-acciones {
+  background: var(--color-bg-subtle);
+}
+.tabla-densa .acciones-fila {
+  display: inline-flex;
+  gap: 2px;
+}
+.tabla-densa .accion-hueco {
+  display: inline-block;
+  width: 28px;
+}
+.tabla-densa .acciones-fila .boton {
+  width: 28px;
+  min-height: 28px;
+  color: var(--color-text-tertiary);
+}
+.tabla-densa .acciones-fila .boton:hover {
+  color: var(--color-text);
+  background: var(--color-bg-muted);
+}
+.tabla-densa .acciones-fila .boton-peligro:hover {
+  color: var(--color-danger);
+  background: var(--color-danger-subtle);
+}
+.tabla-densa .p-paginator {
+  justify-content: flex-end;
+  padding: var(--space-1) var(--space-2);
+  border-top: var(--border-hairline);
+  background: var(--color-bg);
+  font: var(--text-caption);
+}
+.tabla-densa .p-paginator .p-paginator-current {
+  color: var(--color-text-secondary);
+}
+/* La barra lateral ocupa ~250px: por debajo de ~1360px de ventana la tabla tiene menos de 1100px. */
+@media (max-width: 1360px) {
+  .tabla-densa .col-secundaria { display: none; }
+}
+
+.boton-peligro-primario.boton-primario {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+}
+.dialogo-confirmar.p-dialog {
+  width: min(440px, calc(100vw - 32px));
+  box-shadow: var(--shadow-overlay);
+  border-radius: var(--radius-md);
+}
+.dialogo-confirmar .p-dialog-header {
+  padding: var(--space-4) var(--space-5) var(--space-2);
+  font: var(--text-heading);
+}
+.dialogo-confirmar .p-dialog-content {
+  padding: 0 var(--space-5) var(--space-4);
+}
+.dialogo-confirmar .p-dialog-footer {
+  padding: var(--space-3) var(--space-5);
+  border-top: var(--border-hairline);
+}
+
+/* Pestañas sin barra de scroll visible */
+.pestanas { scrollbar-width: none; }
+.pestanas::-webkit-scrollbar { display: none; }
+
+/* ---------- Pulido v2 (DESIGN.md §3–§4.7) ---------- */
+.contenido {
+  padding: var(--space-5) var(--space-6) var(--space-8);
+}
+.page-header {
+  margin-bottom: var(--space-5);
+}
+.page-header h1 {
+  font: var(--text-title);
+}
+
+/* Cifras del inicio: franja con divisores, cada cifra lleva a su lista */
+.cifras-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0;
+  margin-bottom: var(--space-6);
+  border: var(--border-hairline);
+  border-radius: var(--radius-md);
+}
+.cifras-panel .cifra-enlace {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-4) var(--space-5);
+  color: inherit;
+  text-decoration: none;
+  border-right: var(--border-hairline);
+}
+.cifras-panel .cifra-enlace:last-child {
+  border-right: 0;
+}
+.cifras-panel .cifra-enlace:hover {
+  background: var(--color-bg-subtle);
+}
+.cifras-panel .cifra-enlace:hover .cifra-valor {
+  color: var(--color-accent);
+}
+.inicio-columnas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0 var(--space-7);
+}
+@media (max-width: 1100px) {
+  .inicio-columnas { grid-template-columns: minmax(0, 1fr); }
+}
+.lista-pendientes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lista-pendientes a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 40px;
+  padding: 0 var(--space-2);
+  border-bottom: var(--border-hairline);
+  color: var(--color-text);
+  text-decoration: none;
+}
+.lista-pendientes a:hover {
+  background: var(--color-bg-subtle);
+}
+.lista-pendientes .pendiente-numero {
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 20px;
+  padding: 0 var(--space-1);
+  border-radius: 10px;
+  background: var(--color-warning-subtle);
+  color: var(--color-warning);
+  font: 600 12px/1 var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+.lista-pendientes .pendiente-texto {
+  flex: 1;
+  font: var(--text-body);
+}
+.lista-pendientes svg {
+  color: var(--color-text-tertiary);
+}
+
+/* Ficha: secciones de datos en dos columnas en pantallas anchas */
+.ficha-columnas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 0 var(--space-7);
+}
+/* En la rejilla el espacio lo pone la fila, no el margen entre secciones (alinea ambas columnas). */
+.ficha-columnas > .seccion,
+.ficha-columnas > .seccion + .seccion {
+  margin-top: 0;
+  margin-bottom: var(--space-7);
+}
+
+/* Barra de estados de la ficha: franja compacta */
+.barra-estados {
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-hairline);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}

@@ -1,18 +1,23 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Download, FileUp, Link2, Plus, Replace, ScanSearch, Undo2, Unlink, Wrench } from 'lucide-react';
-import { Button, ErrorState, KeyValueList, LoadingState, Section, SpecTable } from '../../components/ui';
+import { DetallesTecnicosEquipo } from './DetallesTecnicosEquipo';
+import { DeteccionResumen } from './DeteccionResumen';
+import { Link, useNavigate } from 'react-router-dom';
+import { Ban, Download, Eye, Link2, Replace, ScanSearch, Undo2, Unlink } from 'lucide-react';
+import { Button, KeyValueList, Section } from '../../components/ui';
+import { TablaCrud, type AccionFila } from '../../components/crud/TablaCrud';
+import { useConfirmar } from '../../components/crud/Confirmar';
 import { PanelFormulario } from '../../components/forms/PanelFormulario';
 import { usePolling } from '../../hooks/usePolling';
 import { useSesion } from '../../hooks/SesionContext';
 import { useEquipos } from '../../hooks/EquiposContext';
 import { api } from '../../services/gestion.service';
 import { fecha, fechaHora, unir } from '../../lib/formato';
-import {
-  MOTIVOS, TIPOS_DOCUMENTO, TIPOS_GARANTIA, et, opcionesDe, type ActivoDetalle, type Asignacion, type Documento, type Garantia, type InstalacionVista, type Orden,
-} from '../../types/gestion';
+import { MOTIVOS, TIPOS_DOCUMENTO, et, opcionesDe, type ActivoDetalle, type Documento, type InstalacionVista } from '../../types/gestion';
 import { EstadoPunto, LineaTiempo, useOpcionesUbicacion, useTiposComponente } from '../gestion/comun';
 import { ListaDiscrepancias } from '../discrepancias/DiscrepanciasPage';
+import { AYUDA_MEDIDA } from '../rastreables/tiposComponente';
+import { TablaAsignacionesCrud, TablaOrdenesCrud } from '../operaciones/OperacionesPages';
+import { TablaGarantiasCrud } from '../maestros/MaestrosPages';
 
 const DESTINOS = [
   { valor: 'ALMACEN', etiqueta: 'Almacén' },
@@ -20,10 +25,35 @@ const DESTINOS = [
   { valor: 'BAJA', etiqueta: 'Baja (dañado, extraviado)' },
 ];
 
+/** Nombres legibles de las claves de especificaciones que guarda el alta desde ScanGP. */
+const ESPECIFICACIONES: Record<string, { etiqueta: string; unidad?: string }> = {
+  procesador: { etiqueta: 'Procesador' },
+  nucleos: { etiqueta: 'Núcleos' },
+  hilos: { etiqueta: 'Hilos' },
+  ramGB: { etiqueta: 'Memoria RAM', unidad: 'GB' },
+  almacenamiento: { etiqueta: 'Almacenamiento' },
+  graficos: { etiqueta: 'Gráficos' },
+  sistemaOperativo: { etiqueta: 'Sistema operativo' },
+  pantalla: { etiqueta: 'Pantalla' },
+};
+
+function etiquetaEspecificacion(clave: string) {
+  if (ESPECIFICACIONES[clave]) return ESPECIFICACIONES[clave].etiqueta;
+  const texto = clave.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_-]+/g, ' ').toLowerCase();
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+function valorEspecificacion(clave: string, valor: unknown) {
+  const unidad = ESPECIFICACIONES[clave]?.unidad;
+  return unidad && /^\d+(\.\d+)?$/.test(String(valor)) ? `${valor} ${unidad}` : String(valor);
+}
+
 export function TabGeneral({ a }: { a: ActivoDetalle }) {
   const specs = Object.entries(a.especificaciones ?? {}).filter(([, v]) => v != null && v !== '');
+  // Dos pilas independientes: izquierda lo que identifica al equipo, derecha lo administrativo.
   return (
-    <>
+    <div className="ficha-dos-columnas">
+      <div>
       <Section titulo="Identificación">
         <KeyValueList
           datos={[
@@ -35,37 +65,40 @@ export function TabGeneral({ a }: { a: ActivoDetalle }) {
           ]}
         />
       </Section>
+      {specs.length > 0 && (
+        <Section titulo="Especificaciones" descripcion="Registradas al dar de alta. Los datos al día están en Detección.">
+          <KeyValueList datos={specs.map(([k, v]) => ({ etiqueta: etiquetaEspecificacion(k), valor: valorEspecificacion(k, v) }))} />
+        </Section>
+      )}
+      </div>
+      <div>
       <Section titulo="Adquisición">
         <KeyValueList
           datos={[
-            { etiqueta: 'Fecha de adquisición', valor: fecha(a.fechaAdquisicion) },
-            { etiqueta: 'Proveedor', valor: a.proveedor },
-            { etiqueta: 'N.º de factura', valor: a.numeroFactura },
-            { etiqueta: 'Costo', valor: a.costo && Number(a.costo).toLocaleString('es', { minimumFractionDigits: 2 }) },
+            { etiqueta: 'Fecha de adquisición', valor: fecha(a.fechaAdquisicion), motivo: 'sin-registrar' },
+            { etiqueta: 'Proveedor', valor: a.proveedor, motivo: 'sin-registrar' },
+            { etiqueta: 'N.º de factura', valor: a.numeroFactura, motivo: 'sin-registrar' },
+            { etiqueta: 'Costo', valor: a.costo && Number(a.costo).toLocaleString('es', { minimumFractionDigits: 2 }), motivo: 'sin-registrar' },
           ]}
         />
       </Section>
-      {specs.length > 0 && (
-        <Section titulo="Especificaciones" descripcion="Registradas al dar de alta. Los datos al día están en la pestaña Detección.">
-          <KeyValueList datos={specs.map(([k, v]) => ({ etiqueta: k, valor: String(v) }))} />
-        </Section>
-      )}
       <Section titulo="Otros datos">
         <KeyValueList
           datos={[
-            { etiqueta: 'Observaciones', valor: a.observaciones },
+            { etiqueta: 'Observaciones', valor: a.observaciones, motivo: 'sin-registrar' },
             { etiqueta: 'Registrado', valor: fechaHora(a.creadoEn) },
             ...(a.fechaBaja ? [{ etiqueta: 'Fecha de baja', valor: fechaHora(a.fechaBaja) }] : []),
           ]}
         />
       </Section>
-    </>
+      </div>
+    </div>
   );
 }
 
 // ------------------------------------------------------------------ Componentes
 
-type PanelComp = { tipo: 'retirar' | 'reemplazar'; inst: InstalacionVista } | { tipo: 'instalar' | 'nuevo' };
+type PanelComp = { tipo: 'retirar' | 'reemplazar'; inst: InstalacionVista } | { tipo: 'instalar' };
 
 export function TabComponentes({ a, onCambio }: { a: ActivoDetalle; onCambio: () => void }) {
   const [retirados, setRetirados] = useState(false);
@@ -76,6 +109,7 @@ export function TabComponentes({ a, onCambio }: { a: ActivoDetalle; onCambio: ()
   const { puede } = useSesion();
   const escribe = puede('ADMIN', 'TECNICO') && a.cicloVida !== 'DADO_DE_BAJA';
   const [panel, setPanel] = useState<PanelComp | null>(null);
+  const navegar = useNavigate();
   const listo = () => {
     datos.recargar();
     almacen.recargar();
@@ -91,58 +125,52 @@ export function TabComponentes({ a, onCambio }: { a: ActivoDetalle; onCambio: ()
     { nombre: 'ubicacionId', etiqueta: 'Almacén', tipo: 'select' as const, opciones: almacenes, requerido: true, visible: (v: Record<string, unknown>) => v.destino === 'ALMACEN' },
     { nombre: 'observacion', etiqueta: 'Observación', tipo: 'textarea' as const, ayuda: 'Qué falla tiene, diagnóstico, n.º de caso de garantía…' },
   ];
+  const vigente = (i: InstalacionVista) => !i.hasta;
+  const acciones: AccionFila<InstalacionVista>[] = [
+    { etiqueta: 'Ver componente', icono: Eye, onClick: (i) => navegar(`/componentes/${i.componente!.id}`) },
+    ...(escribe
+      ? [
+          { etiqueta: 'Reemplazar', icono: Replace, onClick: (i: InstalacionVista) => setPanel({ tipo: 'reemplazar', inst: i }), visible: vigente },
+          { etiqueta: 'Retirar', icono: Undo2, peligro: true, onClick: (i: InstalacionVista) => setPanel({ tipo: 'retirar', inst: i }), visible: vigente },
+        ]
+      : []),
+  ];
 
   return (
     <>
-      <Section
-        titulo="Componentes instalados"
-        descripcion="Piezas con número de serie que se pueden retirar, enviar a mantenimiento o pasar a otro equipo."
-        acciones={
-          <div className="acciones-pagina">
-            <label className="casilla"><input type="checkbox" checked={retirados} onChange={(e) => setRetirados(e.target.checked)} /> Mostrar retirados</label>
-            {escribe && <Button icono={Plus} onClick={() => setPanel({ tipo: 'instalar' })}>Instalar desde almacén</Button>}
-            {escribe && <Button icono={Plus} onClick={() => setPanel({ tipo: 'nuevo' })}>Componente nuevo</Button>}
-          </div>
-        }
-      >
-        {datos.error && !datos.data ? <ErrorState mensaje={datos.error.message} onReintentar={datos.recargar} /> : !datos.data ? <LoadingState /> : (
-          <SpecTable<InstalacionVista>
-            titulo="Componentes instalados"
-            filas={datos.data.instalaciones}
-            vacio="No hay componentes rastreables registrados en este equipo."
-            columnas={[
-              { encabezado: 'Código', mono: true, valor: (i) => <Link to={`/componentes/${i.componente!.id}`}>{i.componente!.codigo}</Link> },
-              { encabezado: 'Tipo', valor: (i) => i.componente!.tipo.nombre },
-              { encabezado: 'Modelo', valor: (i) => unir([i.componente!.marca, i.componente!.modelo]) ?? '—' },
-              { encabezado: 'Capacidad', valor: (i) => i.componente!.capacidad ?? '—' },
-              { encabezado: 'Serie', mono: true, valor: (i) => i.componente!.numeroSerie ?? '—' },
-              { encabezado: 'Desde', valor: (i) => fecha(i.desde) },
-              {
-                encabezado: 'Estado',
-                valor: (i) => i.hasta
-                  ? <span className="texto-terciario">Retirado {fecha(i.hasta)} ({et(i.motivoRetiro)})</span>
-                  : <span className="insignia"><EstadoPunto valor={i.componente!.estadoTecnico} />{i.confirmadaEn && <span className="texto-terciario" title={`ScanGP lo vio el ${fechaHora(i.confirmadaEn)}`}>· confirmado</span>}</span>,
-              },
-              ...(escribe ? [{
-                encabezado: '',
-                ancho: '96px',
-                valor: (i: InstalacionVista) => !i.hasta && (
-                  <span className="acciones-fila">
-                    <Button variante="fantasma" icono={Undo2} aria-label="Retirar" onClick={() => setPanel({ tipo: 'retirar', inst: i })} />
-                    <Button variante="fantasma" icono={Replace} aria-label="Reemplazar" onClick={() => setPanel({ tipo: 'reemplazar', inst: i })} />
-                  </span>
-                ),
-              }] : []),
-            ]}
-          />
-        )}
+      <Section titulo="Componentes con trazabilidad" descripcion="Piezas con número de serie que se pueden retirar, enviar a mantenimiento o pasar a otro equipo.">
+        <TablaCrud<InstalacionVista>
+          titulo="Componentes instalados"
+          filas={datos.data?.instalaciones}
+          error={datos.error}
+          acciones={acciones}
+          nuevo={escribe && { etiqueta: 'Agregar componente', onClick: () => setPanel({ tipo: 'instalar' }) }}
+          filtros={<label className="casilla"><input type="checkbox" checked={retirados} onChange={(e) => setRetirados(e.target.checked)} /> Mostrar retirados</label>}
+          vacio="No hay componentes rastreables registrados en este equipo."
+          columnas={[
+            { encabezado: 'Código', mono: true, ordenar: (i) => i.componente!.codigo, valor: (i) => <Link to={`/componentes/${i.componente!.id}`}>{i.componente!.codigo}</Link> },
+            { encabezado: 'Tipo', ordenar: (i) => i.componente!.tipo.nombre, valor: (i) => i.componente!.tipo.nombre },
+            { encabezado: 'Modelo', valor: (i) => unir([i.componente!.marca, i.componente!.modelo]) },
+            { encabezado: 'Capacidad / medida', valor: (i) => i.componente!.capacidad },
+            { encabezado: 'Serie', mono: true, valor: (i) => i.componente!.numeroSerie, secundaria: true },
+            { encabezado: 'Desde', ordenar: (i) => i.desde, valor: (i) => fecha(i.desde), secundaria: true },
+            {
+              encabezado: 'Estado',
+              valor: (i) => i.hasta
+                ? <span className="texto-terciario">Retirado {fecha(i.hasta)} ({et(i.motivoRetiro)})</span>
+                : <span className="insignia"><EstadoPunto valor={i.componente!.estadoTecnico} />{i.confirmadaEn && <span className="texto-terciario" title={`ScanGP lo vio el ${fechaHora(i.confirmadaEn)}`}>· confirmado</span>}</span>,
+            },
+          ]}
+        />
       </Section>
 
-      {datos.data && datos.data.integrados.length > 0 && (
-        <Section titulo="Integrados" descripcion="Según ScanGP. Sin número de serie: forman parte del equipo y no se rastrean por separado.">
-          <KeyValueList datos={datos.data.integrados.map((x) => ({ etiqueta: x.tipo === 'RAM' ? 'Memoria' : x.tipo, valor: x.descripcion }))} />
+      {datos.data && datos.data.integrados.some((x) => !['PLACA', 'BIOS'].includes(x.tipo)) && (
+        <Section titulo="Características internas del equipo" descripcion="Según el último escaneo de ScanGP.">
+          <KeyValueList datos={datos.data.integrados.filter((x) => !['PLACA', 'BIOS'].includes(x.tipo)).map((x) => ({ etiqueta: ({ RAM: 'Memoria', CPU: 'Procesador', GPU: 'Gráficos', PLACA: 'Placa base', DISCO: 'Disco' } as Record<string, string>)[x.tipo] ?? x.tipo, valor: x.descripcion }))} />
         </Section>
       )}
+
+      {a.dispositivoId && <DetallesTecnicosEquipo dispositivoId={a.dispositivoId} />}
 
       {panel?.tipo === 'retirar' && (
         <PanelFormulario
@@ -170,40 +198,43 @@ export function TabComponentes({ a, onCambio }: { a: ActivoDetalle; onCambio: ()
           onHecho={listo}
         />
       )}
-      {panel?.tipo === 'instalar' && (
-        <PanelFormulario
-          titulo="Instalar desde almacén"
-          textoEnviar="Instalar"
-          campos={[
-            { nombre: 'componenteId', etiqueta: 'Componente', tipo: 'select', opciones: enAlmacen(), requerido: true },
-            { nombre: 'motivo', etiqueta: 'Motivo', tipo: 'select', opciones: opcionesDe(MOTIVOS), requerido: true },
-            { nombre: 'observacion', etiqueta: 'Observación', tipo: 'textarea' },
-          ]}
-          inicial={{ motivo: 'ACTUALIZACION' }}
-          onEnviar={({ componenteId, ...d }) => api.componentes.instalar(String(componenteId), { ...d, activoId: a.id })}
-          onCerrar={() => setPanel(null)}
-          onHecho={listo}
-        />
-      )}
-      {panel?.tipo === 'nuevo' && (
-        <PanelFormulario
-          titulo="Componente nuevo"
-          descripcion="Se registra y queda instalado en este equipo."
-          textoEnviar="Registrar e instalar"
-          campos={[
-            { nombre: 'tipoComponenteId', etiqueta: 'Tipo', tipo: 'select', opciones: tipos.map((t) => ({ valor: t.id, etiqueta: t.nombre })), requerido: true },
-            { nombre: 'marca', etiqueta: 'Marca' },
-            { nombre: 'modelo', etiqueta: 'Modelo' },
-            { nombre: 'numeroSerie', etiqueta: 'Número de serie', ayuda: 'Con él, ScanGP confirmará la instalación en el próximo escaneo.' },
-            { nombre: 'capacidad', etiqueta: 'Capacidad', placeholder: '16 GB, 1 TB…' },
-            { nombre: 'motivo', etiqueta: 'Motivo', tipo: 'select', opciones: opcionesDe(MOTIVOS), requerido: true },
-          ]}
-          inicial={{ motivo: 'ACTUALIZACION' }}
-          onEnviar={(d) => api.componentes.crear({ ...d, activoId: a.id })}
-          onCerrar={() => setPanel(null)}
-          onHecho={listo}
-        />
-      )}
+      {panel?.tipo === 'instalar' && (() => {
+        // Un solo formulario: primero se pregunta de dónde viene la pieza y solo se piden los datos de ese caso.
+        const delAlmacen = (v: Record<string, unknown>) => v.origen === 'ALMACEN';
+        const nueva = (v: Record<string, unknown>) => v.origen === 'NUEVA';
+        const hayEnAlmacen = enAlmacen().length > 0;
+        return (
+          <PanelFormulario
+            titulo={`Agregar componente a ${a.codigoPatrimonial}`}
+            descripcion="La pieza queda instalada en este equipo. ScanGP confirma la instalación en el próximo escaneo si tiene número de serie."
+            textoEnviar="Agregar al equipo"
+            campos={[
+              {
+                nombre: 'origen', etiqueta: '¿De dónde viene la pieza?', tipo: 'select', requerido: true,
+                opciones: [
+                  { valor: 'ALMACEN', etiqueta: hayEnAlmacen ? 'Del almacén (ya está registrada)' : 'Del almacén (no hay piezas disponibles)' },
+                  { valor: 'NUEVA', etiqueta: 'Es nueva: registrarla ahora' },
+                ],
+              },
+              { nombre: 'componenteId', etiqueta: 'Componente del almacén', tipo: 'select', opciones: enAlmacen(), requerido: true, vacio: hayEnAlmacen ? 'Elegir…' : 'No hay componentes en almacén', visible: delAlmacen },
+              { nombre: 'tipoComponenteId', etiqueta: 'Tipo', tipo: 'select', opciones: tipos.map((t) => ({ valor: t.id, etiqueta: t.nombre })), requerido: true, visible: nueva },
+              { nombre: 'marca', etiqueta: 'Marca', visible: nueva },
+              { nombre: 'modelo', etiqueta: 'Modelo', visible: nueva },
+              { nombre: 'numeroSerie', etiqueta: 'Número de serie', ayuda: 'Con él, ScanGP confirmará la instalación en el próximo escaneo.', visible: nueva },
+              { nombre: 'capacidad', etiqueta: 'Capacidad o medida', placeholder: '1 TB, 24", 65 W…', ayuda: AYUDA_MEDIDA, visible: nueva },
+              { nombre: 'motivo', etiqueta: 'Motivo', tipo: 'select', opciones: opcionesDe(MOTIVOS), requerido: true },
+              { nombre: 'observacion', etiqueta: 'Observación', tipo: 'textarea' },
+            ]}
+            inicial={{ origen: hayEnAlmacen ? 'ALMACEN' : 'NUEVA', motivo: 'ACTUALIZACION' }}
+            onEnviar={({ origen, componenteId, observacion, ...d }) =>
+              origen === 'ALMACEN'
+                ? api.componentes.instalar(String(componenteId), { motivo: d.motivo, observacion, activoId: a.id })
+                : api.componentes.crear({ ...d, observaciones: observacion, activoId: a.id })}
+            onCerrar={() => setPanel(null)}
+            onHecho={listo}
+          />
+        );
+      })()}
     </>
   );
 }
@@ -213,29 +244,9 @@ export function TabComponentes({ a, onCambio }: { a: ActivoDetalle; onCambio: ()
 export function TabAsignaciones({ a }: { a: ActivoDetalle }) {
   const datos = usePolling((s) => api.asignaciones.listar({ activoId: a.id }, s), 60_000, a.id);
   return (
-    <Section titulo="Asignaciones" descripcion="Quién tuvo el equipo y cuándo. Las acciones están arriba (Asignar, Transferir, Devolución).">
-      {!datos.data ? <LoadingState /> : <TablaAsignaciones filas={datos.data} mostrar="persona" />}
+    <Section titulo="Asignaciones" descripcion="Quién tuvo el equipo y cuándo. Para asignar, transferir o registrar la devolución, usa los botones de arriba.">
+      <TablaAsignacionesCrud filas={datos.data} error={datos.error} mostrar="persona" />
     </Section>
-  );
-}
-
-export function TablaAsignaciones({ filas, mostrar }: { filas: Asignacion[]; mostrar: 'persona' | 'activo' }) {
-  return (
-    <SpecTable<Asignacion>
-      titulo="Asignaciones"
-      filas={filas}
-      vacio="Sin asignaciones registradas."
-      columnas={[
-        mostrar === 'persona'
-          ? { encabezado: 'Responsable', valor: (x) => x.persona ? <Link to={`/personas/${x.persona.id}`}>{x.persona.nombre}</Link> : x.area?.nombre }
-          : { encabezado: 'Activo', valor: (x) => x.activo && <Link to={`/activos/${x.activo.id}`}>{x.activo.codigoPatrimonial} · {x.activo.nombre}</Link> },
-        { encabezado: 'Tipo', valor: (x) => et(x.tipo) },
-        { encabezado: 'Desde', valor: (x) => fecha(x.desde) },
-        { encabezado: 'Hasta', valor: (x) => x.hasta ? fecha(x.hasta) : x.hastaPrevisto ? <span className={x.hastaPrevisto < new Date().toISOString().slice(0, 10) ? 'estado-problema' : ''}>Previsto {fecha(x.hastaPrevisto)}</span> : <strong>Vigente</strong> },
-        { encabezado: 'Cierre', valor: (x) => (x.motivoCierre ? et(x.motivoCierre) : '—') },
-        { encabezado: 'Observaciones', valor: (x) => x.observaciones ?? '—' },
-      ]}
-    />
   );
 }
 
@@ -243,78 +254,17 @@ export function TabMantenimientos({ a }: { a: ActivoDetalle }) {
   const datos = usePolling((s) => api.mantenimiento.listar({ activoId: a.id }, s), 60_000, a.id);
   return (
     <Section titulo="Mantenimientos">
-      {!datos.data ? <LoadingState /> : <TablaOrdenes filas={datos.data} />}
+      <TablaOrdenesCrud filas={datos.data} error={datos.error} />
     </Section>
-  );
-}
-
-export function TablaOrdenes({ filas, conActivo }: { filas: Orden[]; conActivo?: boolean }) {
-  return (
-    <SpecTable<Orden>
-      titulo="Órdenes de mantenimiento"
-      filas={filas}
-      vacio="Sin órdenes de mantenimiento."
-      columnas={[
-        { encabezado: 'Orden', mono: true, valor: (o) => <Link to={`/mantenimiento/${o.id}`}>{o.codigo}</Link> },
-        ...(conActivo ? [{ encabezado: 'Activo', valor: (o: Orden) => o.activo && <Link to={`/activos/${o.activo.id}`}>{o.activo.codigoPatrimonial} · {o.activo.nombre}</Link> }] : []),
-        { encabezado: 'Tipo', valor: (o) => `${et(o.tipo)} · ${et(o.motivo)}` },
-        { encabezado: 'Falla', valor: (o) => o.fallaReportada },
-        { encabezado: 'Apertura', valor: (o) => fecha(o.fechaApertura) },
-        { encabezado: 'Estado', valor: (o) => <EstadoPunto valor={o.estado} /> },
-        { encabezado: 'Resultado', valor: (o) => (o.resultado ? et(o.resultado) : '—') },
-      ]}
-    />
   );
 }
 
 export function TabGarantias({ a }: { a: ActivoDetalle }) {
   const datos = usePolling((s) => api.garantias.listar({ activoId: a.id }, s), 60_000, a.id);
-  const [nueva, setNueva] = useState(false);
-  const { puede } = useSesion();
   return (
-    <Section titulo="Garantías y soporte" acciones={puede('ADMIN', 'TECNICO') && <Button icono={Plus} onClick={() => setNueva(true)}>Nueva garantía</Button>}>
-      {!datos.data ? <LoadingState /> : <TablaGarantias filas={datos.data} />}
-      {nueva && <PanelGarantia activoId={a.id} onCerrar={() => setNueva(false)} onHecho={datos.recargar} />}
+    <Section titulo="Garantías y soporte">
+      <TablaGarantiasCrud filas={datos.data} activoId={a.id} onCambio={datos.recargar} />
     </Section>
-  );
-}
-
-export function TablaGarantias({ filas, conActivo }: { filas: Garantia[]; conActivo?: boolean }) {
-  const hoy = new Date().toISOString().slice(0, 10);
-  return (
-    <SpecTable<Garantia>
-      titulo="Garantías"
-      filas={filas}
-      vacio="Sin garantías registradas."
-      columnas={[
-        ...(conActivo ? [{ encabezado: 'Cubre', valor: (g: Garantia) => g.activoId ? <Link to={`/activos/${g.activoId}`}>{g.activoCodigo} · {g.activoNombre}</Link> : g.componenteId && <Link to={`/componentes/${g.componenteId}`}>{g.componenteCodigo}</Link> }] : []),
-        { encabezado: 'Tipo', valor: (g) => et(g.tipo) },
-        { encabezado: 'Proveedor', valor: (g) => g.proveedor },
-        { encabezado: 'Contrato', valor: (g) => g.numeroContrato ?? '—' },
-        { encabezado: 'Inicio', valor: (g) => fecha(g.inicio) },
-        { encabezado: 'Fin', valor: (g) => <span className={g.fin < hoy ? 'estado-problema' : ''}>{fecha(g.fin)}{g.fin < hoy ? ' (vencida)' : ''}</span> },
-      ]}
-    />
-  );
-}
-
-export function PanelGarantia({ activoId, componenteId, onCerrar, onHecho }: { activoId?: string; componenteId?: string; onCerrar: () => void; onHecho: () => void }) {
-  return (
-    <PanelFormulario
-      titulo="Nueva garantía"
-      campos={[
-        { nombre: 'tipo', etiqueta: 'Tipo', tipo: 'select', opciones: opcionesDe(TIPOS_GARANTIA), requerido: true },
-        { nombre: 'proveedor', etiqueta: 'Proveedor', requerido: true },
-        { nombre: 'numeroContrato', etiqueta: 'N.º de contrato o caso' },
-        { nombre: 'inicio', etiqueta: 'Inicio', tipo: 'fecha', requerido: true },
-        { nombre: 'fin', etiqueta: 'Fin', tipo: 'fecha', requerido: true },
-        { nombre: 'observaciones', etiqueta: 'Observaciones', tipo: 'textarea' },
-      ]}
-      inicial={{ tipo: 'FABRICANTE' }}
-      onEnviar={(d) => api.garantias.crear({ ...d, activoId, componenteId })}
-      onCerrar={onCerrar}
-      onHecho={onHecho}
-    />
   );
 }
 
@@ -324,23 +274,43 @@ export function TabDocumentos({ entidad, entidadId }: { entidad: string; entidad
   const datos = usePolling((s) => api.documentos.listar(entidad, entidadId, s), 60_000, entidadId);
   const [subir, setSubir] = useState(false);
   const { puede } = useSesion();
+  const confirmar = useConfirmar();
+  const escribe = puede('ADMIN', 'TECNICO');
+  const acciones: AccionFila<Documento>[] = [
+    { etiqueta: 'Descargar', icono: Download, onClick: (d) => void api.documentos.descargar(d) },
+    ...(escribe
+      ? [{
+          etiqueta: 'Anular',
+          icono: Ban,
+          peligro: true,
+          onClick: async (d: Documento) => {
+            const ok = await confirmar({ titulo: 'Anular documento', mensaje: `«${d.nombreArchivo}» dejará de mostrarse. El archivo se conserva en el servidor.`, accion: 'Anular', peligro: true });
+            if (ok) {
+              await api.documentos.anular(d.id);
+              datos.recargar();
+            }
+          },
+        }]
+      : []),
+  ];
   return (
-    <Section titulo="Documentos" descripcion="Facturas, actas de entrega, informes técnicos. Máximo 20 MB por archivo." acciones={puede('ADMIN', 'TECNICO') && <Button icono={FileUp} onClick={() => setSubir(true)}>Adjuntar</Button>}>
-      {!datos.data ? <LoadingState /> : (
-        <SpecTable<Documento>
-          titulo="Documentos"
-          filas={datos.data}
-          vacio="Sin documentos adjuntos."
-          columnas={[
-            { encabezado: 'Archivo', valor: (d) => d.nombreArchivo },
-            { encabezado: 'Tipo', valor: (d) => et(d.tipo) },
-            { encabezado: 'Descripción', valor: (d) => d.descripcion ?? '—' },
-            { encabezado: 'Tamaño', numerica: true, valor: (d) => `${Math.max(1, Math.round(d.tamanoBytes / 1024))} KB` },
-            { encabezado: 'Fecha', valor: (d) => fecha(d.creadoEn) },
-            { encabezado: '', ancho: '48px', valor: (d) => <Button variante="fantasma" icono={Download} aria-label={`Descargar ${d.nombreArchivo}`} onClick={() => void api.documentos.descargar(d)} /> },
-          ]}
-        />
-      )}
+    <Section titulo="Documentos" descripcion="Facturas, actas de entrega, informes técnicos. Máximo 20 MB por archivo.">
+      <TablaCrud<Documento>
+        titulo="Documentos"
+        filas={datos.data}
+        error={datos.error}
+        acciones={acciones}
+        nuevo={escribe && { etiqueta: 'Adjuntar', onClick: () => setSubir(true) }}
+        textoBusqueda={(d) => `${d.nombreArchivo} ${d.descripcion ?? ''} ${et(d.tipo)}`}
+        vacio="Sin documentos adjuntos."
+        columnas={[
+          { encabezado: 'Archivo', ordenar: (d) => d.nombreArchivo, valor: (d) => d.nombreArchivo },
+          { encabezado: 'Tipo', ordenar: (d) => d.tipo, valor: (d) => et(d.tipo) },
+          { encabezado: 'Descripción', valor: (d) => d.descripcion, secundaria: true, envolver: true },
+          { encabezado: 'Tamaño', numerica: true, ordenar: (d) => d.tamanoBytes, valor: (d) => `${Math.max(1, Math.round(d.tamanoBytes / 1024))} KB` },
+          { encabezado: 'Fecha', ordenar: (d) => d.creadoEn, valor: (d) => fecha(d.creadoEn) },
+        ]}
+      />
       {subir && (
         <PanelFormulario
           titulo="Adjuntar documento"
@@ -372,7 +342,7 @@ export function TabHistorial({ a }: { a: ActivoDetalle }) {
   const datos = usePolling((s) => api.activos.historial(a.id, s), 60_000, a.id);
   return (
     <Section titulo="Historial" descripcion="Todo lo que pasó con el activo. No se puede modificar ni borrar.">
-      {!datos.data ? <LoadingState /> : <LineaTiempo movimientos={datos.data} />}
+      {datos.data ? <LineaTiempo movimientos={datos.data} /> : null}
     </Section>
   );
 }
@@ -380,21 +350,26 @@ export function TabHistorial({ a }: { a: ActivoDetalle }) {
 export function TabDeteccion({ a, onCambio }: { a: ActivoDetalle; onCambio: () => void }) {
   const { puede } = useSesion();
   const { equipos } = useEquipos();
+  const confirmar = useConfirmar();
   const [vincular, setVincular] = useState(false);
   const sinVincular = (equipos ?? []).filter((e) => !e.activoId).map((e) => ({ valor: e.id, etiqueta: `${e.resumen.nombreEquipo} · ${unir([e.resumen.fabricante, e.resumen.modelo]) ?? ''} · serie ${e.resumen.numeroSerie ?? '—'}` }));
+  const desvincular = async () => {
+    const ok = await confirmar({ titulo: 'Desvincular de ScanGP', mensaje: 'El activo deja de recibir los datos y las discrepancias de ese equipo detectado. Puedes volver a vincularlo.', accion: 'Desvincular', peligro: true });
+    if (ok) {
+      await api.activos.desvincular(a.id);
+      onCambio();
+    }
+  };
   return (
     <>
       <Section
         titulo="Equipo detectado por ScanGP"
         acciones={puede('ADMIN', 'TECNICO') && (a.dispositivoId
-          ? <Button variante="fantasma" icono={Unlink} onClick={() => void api.activos.desvincular(a.id).then(onCambio)}>Desvincular</Button>
+          ? <Button variante="fantasma" icono={Unlink} onClick={() => void desvincular()}>Desvincular</Button>
           : <Button icono={Link2} onClick={() => setVincular(true)}>Vincular con un equipo detectado</Button>)}
       >
         {a.dispositivoId ? (
-          <p>
-            <Button icono={ScanSearch} a={`/equipos/${a.dispositivoId}`}>Ver datos técnicos detectados</Button>{' '}
-            <span className="texto-terciario">Procesador, memoria, discos, batería, compatibilidad, diagnóstico e historial de escaneos.</span>
-          </p>
+          <DeteccionResumen dispositivoId={a.dispositivoId} />
         ) : (
           <p className="texto-secundario">
             {a.sincronizacion === 'NO_APLICA'
@@ -403,7 +378,7 @@ export function TabDeteccion({ a, onCambio }: { a: ActivoDetalle; onCambio: () =
           </p>
         )}
       </Section>
-      <Section titulo="Discrepancias" descripcion="Diferencias entre lo que ve ScanGP y lo registrado. Nada cambia en el inventario hasta que las aceptes.">
+      <Section titulo="Discrepancias" descripcion="Diferencias que requieren revisión entre la detección de ScanGP y el inventario registrado.">
         <ListaDiscrepancias activoId={a.id} onCambio={onCambio} />
       </Section>
       {vincular && (
@@ -419,5 +394,3 @@ export function TabDeteccion({ a, onCambio }: { a: ActivoDetalle; onCambio: () =
     </>
   );
 }
-
-export const IconoMantenimiento = Wrench;

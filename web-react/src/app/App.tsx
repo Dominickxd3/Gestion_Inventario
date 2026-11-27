@@ -30,14 +30,17 @@ import { LoginPage } from '../features/auth/LoginPage';
 import { CambiarPasswordPage } from '../features/auth/CambiarPasswordPage';
 import { Button, EmptyState, LoadingState } from '../components/ui';
 import { SesionProvider, useSesion } from '../hooks/SesionContext';
+import { ConfirmarProvider } from '../components/crud/Confirmar';
 import type { Rol } from '../types/identidad';
 
 export function App() {
   return (
     <SesionProvider>
-      <BrowserRouter>
-        <Puerta />
-      </BrowserRouter>
+      <ConfirmarProvider>
+        <BrowserRouter>
+          <Puerta />
+        </BrowserRouter>
+      </ConfirmarProvider>
     </SesionProvider>
   );
 }

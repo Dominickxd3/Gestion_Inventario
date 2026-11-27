@@ -1,0 +1,26 @@
+.dialogo-confirmar.p-dialog {
+  width: min(480px, calc(100vw - 32px));
+  border: var(--border-hairline);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-overlay);
+  overflow: hidden;
+}
+.dialogo-confirmar.p-dialog .p-dialog-header {
+  background: var(--color-bg);
+  color: var(--color-text);
+  padding: var(--space-5);
+  border-bottom: var(--border-hairline);
+}
+.dialogo-confirmar .p-dialog-title { font: var(--text-heading); }
+.dialogo-confirmar.p-dialog .p-dialog-content { padding: var(--space-5); background: var(--color-bg); }
+.dialogo-confirmar.p-dialog .p-dialog-footer { padding: var(--space-4) var(--space-5); border-top: var(--border-hairline); background: var(--color-bg); }
+.confirmar-mensaje { display: flex; align-items: flex-start; gap: var(--space-3); color: var(--color-text-secondary); font: var(--text-body); }
+.confirmar-mensaje > svg { flex: none; color: var(--color-accent); }
+.confirmar-peligro > svg { color: var(--color-warning); }
+.confirmar-mensaje p { margin: 0; overflow-wrap: anywhere; }
+.confirmar-acciones { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); }
+.confirmar-acciones .boton { margin: 0; }
+.avisos-gestion.p-toast { width: min(380px, calc(100vw - 32px)); }
+.avisos-gestion .p-toast-message-error { border-left-color: var(--color-danger); color: var(--color-text); }
+.avisos-gestion .p-toast-message-error .p-toast-message-icon { color: var(--color-danger); }
+.avisos-gestion .p-toast-detail { overflow-wrap: anywhere; }

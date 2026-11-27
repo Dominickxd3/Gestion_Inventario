@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Check, CircleAlert, Copy } from 'lucide-react';
-import { Button, Icon, SelectField, SidePanel, TextField } from '../../components/ui';
+import { Button, Icon, SelectField, ModalFlotante, TextField } from '../../components/ui';
 import { usuariosService } from '../../services/auth.service';
 import { DESCRIPCION_ROL, ETIQUETA_ROL, type Rol, type UsuarioPlataforma } from '../../types/identidad';
 
@@ -18,7 +18,7 @@ interface Props {
   onCambio: () => void;
 }
 
-/** Crear, editar o restablecer la contraseña de un usuario, en panel lateral. */
+/** Crear, editar o restablecer la contraseña de un usuario, en ventana flotante centrada. */
 export function PanelUsuario({ modo, onCerrar, onCambio }: Props) {
   const existente = modo.tipo === 'crear' ? null : modo.usuario;
   const [nombreUsuario, setNombreUsuario] = useState('');
@@ -69,7 +69,6 @@ export function PanelUsuario({ modo, onCerrar, onCambio }: Props) {
     </Button>
   ) : (
     <>
-      <Button onClick={onCerrar}>Cancelar</Button>
       <Button variante="primario" onClick={() => guardar()} disabled={enviando}>
         {modo.tipo === 'crear' ? 'Crear usuario' : modo.tipo === 'editar' ? 'Guardar' : 'Generar contraseña temporal'}
       </Button>
@@ -77,7 +76,7 @@ export function PanelUsuario({ modo, onCerrar, onCambio }: Props) {
   );
 
   return (
-    <SidePanel titulo={titulo} abierto onCerrar={onCerrar} pie={pie}>
+    <ModalFlotante titulo={titulo} onCerrar={onCerrar} pie={pie}>
       {temporal ? (
         <MostrarTemporal {...temporal} />
       ) : (
@@ -126,7 +125,7 @@ export function PanelUsuario({ modo, onCerrar, onCambio }: Props) {
           )}
         </form>
       )}
-    </SidePanel>
+    </ModalFlotante>
   );
 }
 

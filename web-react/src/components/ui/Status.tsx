@@ -13,6 +13,18 @@ export function StatusBadge({ estado, texto }: { estado: Estado; texto?: string 
   );
 }
 
+export type TonoEstado = 'ok' | 'aviso' | 'problema' | 'neutro';
+
+/** Estado compacto de tablas y fichas: punto de color + texto (DESIGN.md §4.2). */
+export function PuntoEstado({ tono, texto }: { tono: TonoEstado; texto: ReactNode }) {
+  return (
+    <span className="insignia">
+      <span className={`punto-estado punto-${tono}`} aria-hidden="true" />
+      {texto}
+    </span>
+  );
+}
+
 interface LineaProps {
   estado: Estado;
   titulo: ReactNode;

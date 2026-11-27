@@ -32,11 +32,17 @@ describe('Gestión de activos (e2e, SQL Server)', () => {
 
   const ids: Record<string, string> = {};
 
+  const modoAnterior = process.env.SCANGP_REGISTRO_AUTOMATICO;
   beforeAll(async () => {
+    process.env.SCANGP_REGISTRO_AUTOMATICO = 'false';
     ctx = await crearAppPruebas();
     auth = (await ctx.crearUsuario('ADMIN')).auth;
   });
-  afterAll(() => ctx?.app.close());
+  afterAll(async () => {
+    if (modoAnterior === undefined) delete process.env.SCANGP_REGISTRO_AUTOMATICO;
+    else process.env.SCANGP_REGISTRO_AUTOMATICO = modoAnterior;
+    await ctx?.app.close();
+  });
 
   it('ScanGP guarda un escaneo solo cuando cambia algo más que los datos volátiles', async () => {
     const r1 = await escanear().expect(200);

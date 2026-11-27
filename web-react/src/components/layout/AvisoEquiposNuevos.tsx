@@ -26,5 +26,5 @@ export function AvisoEquiposNuevos() {
     conocidos.current = new Set(equipos.map((e) => e.id));
   }, [equipos]);
 
-  return <Toast ref={toast} position="bottom-right" />;
+  return <Toast ref={toast} position="bottom-center" />;
 }

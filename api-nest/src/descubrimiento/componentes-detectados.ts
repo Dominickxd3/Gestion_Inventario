@@ -62,3 +62,14 @@ export function resumenIntegrados(lista: ComponenteDetectado[]) {
     ...otros.map((c) => ({ tipo: c.tipo, descripcion: `${c.modelo ?? c.tipo} ${c.capacidad ?? ''} (sin número de serie)`.trim() })),
   ];
 }
+
+/** Desglose técnico completo sin inventar identidad para piezas sin serie fiable. */
+export function integradosDelInventario(p: InventarioPayload) {
+  const placa = p.placaBase as { fabricante?: string; modelo?: string; numeroSerie?: string } | null;
+  return [
+    ...resumenIntegrados(componentesDetectados(p)),
+    ...(p.procesadores ?? []).filter((x) => x.nombre).map((x) => ({ tipo: 'CPU', descripcion: [x.nombre, x.nucleos ? x.nucleos + ' núcleos' : null, x.hilos ? x.hilos + ' hilos' : null].filter(Boolean).join(' · ') })),
+    ...(p.graficos ?? []).filter((x) => x.nombre).map((x) => ({ tipo: 'GPU', descripcion: x.nombre! })),
+    ...(placa?.modelo ? [{ tipo: 'PLACA', descripcion: [placa.fabricante, placa.modelo, placa.numeroSerie ? 'Serie ' + placa.numeroSerie : null].filter(Boolean).join(' · ') }] : []),
+  ];
+}

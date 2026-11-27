@@ -2,12 +2,15 @@ import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from 
 import { Actor } from '../common/dominio';
 import { ReemplazarDto } from '../componentes/componentes.dto';
 import { ComponentesService } from '../componentes/componentes.service';
-import { componentesDetectados, resumenIntegrados } from '../descubrimiento/componentes-detectados';
+import { integradosDelInventario } from '../descubrimiento/componentes-detectados';
 import type { InventarioPayload } from '../descubrimiento/inventario.types';
 import { ActorActual, Roles } from '../identidad/decoradores';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { BajaDto, CicloDto, CrearActivoDto, DatosActivoDto, EstadoTecnicoDto, FiltroActivosDto, UbicacionDto, VincularDto } from './activos.dto';
+import { RegistroAutomaticoService } from '../descubrimiento/registro-automatico.service';
+import { DispositivoDetectado } from '../descubrimiento/descubrimiento.entities';
+import { resumir } from '../descubrimiento/ingesta.service';
 import { ActivosService } from './activos.service';
 
 @Controller('activos')
@@ -15,6 +18,7 @@ export class ActivosController {
   constructor(
     private readonly activos: ActivosService,
     private readonly componentes: ComponentesService,
+    private readonly automatico: RegistroAutomaticoService,
     @InjectDataSource() private readonly db: DataSource,
   ) {}
 
@@ -33,7 +37,7 @@ export class ActivosController {
   async componentesDe(@Param('id', ParseUUIDPipe) id: string, @Query('retirados') retirados?: string) {
     const instalaciones = await this.componentes.instalacionesDe(id, retirados === 'true');
     const [d] = await this.db.query(`SELECT ultimo_inventario FROM [itam].[dispositivo_detectado] WHERE activo_id = @0`, [id]);
-    const integrados = d?.ultimo_inventario ? resumenIntegrados(componentesDetectados(JSON.parse(d.ultimo_inventario) as InventarioPayload)) : [];
+    const integrados = d?.ultimo_inventario ? integradosDelInventario(JSON.parse(d.ultimo_inventario) as InventarioPayload) : [];
     return {
       instalaciones: instalaciones.map((i) => ({
         id: i.id,
@@ -76,7 +80,15 @@ export class ActivosController {
     return this.activos.darDeBaja(a, id, d);
   }
   @Roles('ADMIN', 'TECNICO') @Post(':id/vincular') vincular(@Param('id', ParseUUIDPipe) id: string, @Body() d: VincularDto, @ActorActual() a: Actor) {
-    return this.activos.vincular(a, id, d.dispositivoId);
+    return this.db.transaction(async (em) => {
+      await this.activos.vincular(a, id, d.dispositivoId, em);
+      const equipo = await em.findOneByOrFail(DispositivoDetectado, { id: d.dispositivoId });
+      if (equipo.ultimoInventario) {
+        const p = equipo.ultimoInventario as InventarioPayload;
+        await this.automatico.sincronizar(em, equipo, p, resumir(p), true);
+      }
+      return equipo;
+    });
   }
   @Roles('ADMIN', 'TECNICO') @Post(':id/desvincular') desvincular(@Param('id', ParseUUIDPipe) id: string, @ActorActual() a: Actor) {
     return this.activos.desvincular(a, id);

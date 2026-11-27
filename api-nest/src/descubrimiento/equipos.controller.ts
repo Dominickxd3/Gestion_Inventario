@@ -8,7 +8,7 @@ import { Actor, regla } from '../common/dominio';
 import { ComponentesService } from '../componentes/componentes.service';
 import { ActorActual, Publico, Roles } from '../identidad/decoradores';
 import { ApiKeyGuard } from './api-key.guard';
-import { componentesDetectados, resumenIntegrados } from './componentes-detectados';
+import { componentesDetectados, integradosDelInventario } from './componentes-detectados';
 import { CambioDetectado, DispositivoDetectado } from './descubrimiento.entities';
 import { IngestaService } from './ingesta.service';
 import type { InventarioPayload } from './inventario.types';
@@ -122,7 +122,7 @@ export class DetectadosService {
         procesador: r.procesador, nucleos: r.nucleos, ramGB: r.ramGB, almacenamiento: r.discos, graficos: r.gpu, sistemaOperativo: r.sistemaOperativo,
       },
       componentes: detectados.filter((c) => !c.integrado).map(({ tipo, marca, modelo, numeroSerie, capacidad }) => ({ tipo, marca, modelo, numeroSerie, capacidad })),
-      integrados: resumenIntegrados(detectados),
+      integrados: integradosDelInventario(p),
     };
   }
 

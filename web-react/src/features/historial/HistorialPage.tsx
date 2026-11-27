@@ -3,6 +3,12 @@ import { fechaHora, plural } from '../../lib/formato';
 import { useEquipoActual } from '../equipo/contexto';
 
 const CAMPOS: Record<string, string> = {
+  'hardware.discos': 'Discos y números de serie',
+  'hardware.memoria': 'Módulos de memoria',
+  'hardware.procesadores': 'Características del procesador',
+  'hardware.graficos': 'Características de gráficos',
+  'hardware.placaBase': 'Placa base',
+  'hardware.monitores': 'Monitores',
   nombreEquipo: 'Nombre del equipo',
   usuario: 'Usuario',
   procesador: 'Procesador',

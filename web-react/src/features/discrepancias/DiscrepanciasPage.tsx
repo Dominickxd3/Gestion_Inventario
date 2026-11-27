@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, X } from 'lucide-react';
-import { Button, ErrorState, LoadingState, PageHeader, SelectField, SpecTable } from '../../components/ui';
+import { Check, Eye, X } from 'lucide-react';
+import { PageHeader, SelectField } from '../../components/ui';
+import { TablaCrud, type AccionFila } from '../../components/crud/TablaCrud';
 import { PanelFormulario, type Campo } from '../../components/forms/PanelFormulario';
 import { usePolling } from '../../hooks/usePolling';
 import { useSesion } from '../../hooks/SesionContext';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/gestion.service';
 import { fechaHora } from '../../lib/formato';
 import { MOTIVOS, et, opcionesDe, type Discrepancia } from '../../types/gestion';
@@ -27,22 +29,32 @@ export function DiscrepanciasPage() {
         titulo="Discrepancias"
         subtitulo="Diferencias entre lo que detecta ScanGP y el inventario validado. Nada cambia hasta que TI las acepta."
       />
-      <div className="filtros-fila">
-        <SelectField
-          etiqueta="Estado"
-          value={estado}
-          onChange={(e) => setEstado(e.target.value)}
-          opciones={[...opcionesDe(['PENDIENTE', 'ACEPTADA', 'RECHAZADA', 'RESUELTA_AUTO']), { valor: 'TODAS', etiqueta: 'Todas' }]}
-        />
-      </div>
-      <ListaDiscrepancias estado={estado} conActivo />
+      <ListaDiscrepancias
+        estado={estado}
+        conActivo
+        filtros={
+          <SelectField
+            etiqueta="Estado"
+            value={estado}
+            onChange={(e) => setEstado(e.target.value)}
+            opciones={[...opcionesDe(['PENDIENTE', 'ACEPTADA', 'RECHAZADA', 'RESUELTA_AUTO']), { valor: 'TODAS', etiqueta: 'Todas' }]}
+          />
+        }
+      />
     </>
   );
 }
 
-export function ListaDiscrepancias({ activoId, estado = 'PENDIENTE', conActivo, onCambio }: { activoId?: string; estado?: string; conActivo?: boolean; onCambio?: () => void }) {
+export function ListaDiscrepancias({ activoId, estado = 'PENDIENTE', conActivo, onCambio, filtros }: {
+  activoId?: string;
+  estado?: string;
+  conActivo?: boolean;
+  onCambio?: () => void;
+  filtros?: React.ReactNode;
+}) {
   const datos = usePolling((s) => api.discrepancias.listar({ estado, activoId }, s), 30_000, `${estado}${activoId}`);
   const { puede } = useSesion();
+  const navegar = useNavigate();
   const almacenes = useOpcionesUbicacion();
   const [panel, setPanel] = useState<{ d: Discrepancia; accion: 'aceptar' | 'rechazar' } | null>(null);
   const listo = () => {
@@ -50,8 +62,16 @@ export function ListaDiscrepancias({ activoId, estado = 'PENDIENTE', conActivo, 
     onCambio?.();
   };
 
-  if (datos.error && !datos.data) return <ErrorState mensaje={datos.error.message} onReintentar={datos.recargar} />;
-  if (!datos.data) return <LoadingState />;
+  const pendiente = (d: Discrepancia) => d.estado === 'PENDIENTE';
+  const acciones: AccionFila<Discrepancia>[] = [
+    ...(conActivo ? [{ etiqueta: 'Ver activo', icono: Eye, onClick: (d: Discrepancia) => navegar(`/activos/${d.activoId}?tab=deteccion`) }] : []),
+    ...(puede('ADMIN', 'TECNICO')
+      ? [
+          { etiqueta: 'Aceptar', icono: Check, onClick: (d: Discrepancia) => setPanel({ d, accion: 'aceptar' }), visible: pendiente },
+          { etiqueta: 'Rechazar', icono: X, peligro: true, onClick: (d: Discrepancia) => setPanel({ d, accion: 'rechazar' }), visible: pendiente },
+        ]
+      : []),
+  ];
 
   const camposAceptar = (d: Discrepancia): Campo[] =>
     d.tipo === 'COMPONENTE_AUSENTE'
@@ -65,29 +85,22 @@ export function ListaDiscrepancias({ activoId, estado = 'PENDIENTE', conActivo, 
 
   return (
     <>
-      <SpecTable<Discrepancia>
+      <TablaCrud<Discrepancia>
         titulo="Discrepancias"
         filas={datos.data}
+        error={datos.error}
+        onReintentar={datos.recargar}
+        filtros={filtros}
+        acciones={acciones}
+        textoBusqueda={(d) => `${d.activoCodigo} ${d.activoNombre} ${d.descripcion} ${et(d.tipo)}`}
         vacio={estado === 'PENDIENTE' ? 'No hay discrepancias pendientes: lo detectado coincide con lo registrado.' : 'Sin registros.'}
         columnas={[
-          ...(conActivo ? [{ encabezado: 'Activo', valor: (d: Discrepancia) => <Link to={`/activos/${d.activoId}?tab=deteccion`}>{d.activoCodigo} · {d.activoNombre}</Link> }] : []),
-          { encabezado: 'Tipo', valor: (d) => et(d.tipo) },
-          { encabezado: 'Detalle', valor: (d) => d.descripcion },
-          { encabezado: 'Detectado', valor: (d) => fechaHora(d.creadoEn) },
+          ...(conActivo ? [{ encabezado: 'Activo', ordenar: (d: Discrepancia) => d.activoCodigo, valor: (d: Discrepancia) => <Link to={`/activos/${d.activoId}?tab=deteccion`}>{d.activoCodigo} · {d.activoNombre}</Link> }] : []),
+          { encabezado: 'Tipo', ordenar: (d) => d.tipo, valor: (d) => et(d.tipo) },
+          { encabezado: 'Detalle', valor: (d) => d.descripcion, envolver: true },
+          { encabezado: 'Detectado', ordenar: (d) => d.creadoEn, valor: (d) => fechaHora(d.creadoEn), secundaria: true },
           ...(estado !== 'PENDIENTE'
             ? [{ encabezado: 'Resolución', valor: (d: Discrepancia) => <span><EstadoPunto valor={d.estado} />{d.resolucion && <span className="texto-terciario"> · {d.resolucion}</span>}</span> }]
-            : []),
-          ...(estado === 'PENDIENTE' && puede('ADMIN', 'TECNICO')
-            ? [{
-                encabezado: '',
-                ancho: '96px',
-                valor: (d: Discrepancia) => (
-                  <span className="acciones-fila">
-                    <Button variante="fantasma" icono={Check} aria-label="Aceptar" onClick={() => setPanel({ d, accion: 'aceptar' })} />
-                    <Button variante="fantasma" icono={X} aria-label="Rechazar" onClick={() => setPanel({ d, accion: 'rechazar' })} />
-                  </span>
-                ),
-              }]
             : []),
         ]}
       />

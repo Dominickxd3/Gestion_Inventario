@@ -5,7 +5,7 @@ export const ETIQUETAS: Record<string, string> = {
   SIN_EVALUAR: 'Sin evaluar', OPERATIVO: 'Operativo', CON_FALLAS: 'Con fallas', AVERIADO: 'Averiado', IRREPARABLE: 'Irreparable',
   FALLA_TECNICA: 'Falla técnica', PREVENTIVO: 'Preventivo', CORRECTIVO: 'Correctivo', GARANTIA: 'Garantía', ACTUALIZACION: 'Actualización',
   DANO_FISICO: 'Daño físico', REASIGNACION: 'Reasignación', OTRO: 'Otro',
-  PERMANENTE: 'Permanente', PRESTAMO: 'Préstamo', TEMPORAL_REEMPLAZO: 'Reemplazo temporal',
+  PERMANENTE: 'Asignación sin fecha de devolución', PRESTAMO: 'Préstamo con fecha de devolución', TEMPORAL_REEMPLAZO: 'Reemplazo temporal',
   INSTALADO: 'Instalado', EN_ALMACEN: 'En almacén', EN_MANTENIMIENTO: 'En mantenimiento',
   ABIERTA: 'Abierta', EN_CURSO: 'En curso', EN_ESPERA: 'En espera', CERRADA: 'Cerrada', CANCELADA: 'Cancelada',
   PUESTO: 'Puesto de trabajo', ALMACEN: 'Almacén', TALLER: 'Taller', PROVEEDOR: 'Proveedor',

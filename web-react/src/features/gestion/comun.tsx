@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { PuntoEstado } from '../../components/ui';
 import { usePolling } from '../../hooks/usePolling';
 import { api } from '../../services/gestion.service';
 import { fechaHora } from '../../lib/formato';
@@ -10,18 +11,12 @@ const TONO: Record<string, 'ok' | 'aviso' | 'problema' | 'neutro'> = {
   EN_SERVICIO: 'ok', OPERATIVO: 'ok', SINCRONIZADO: 'ok', INSTALADO: 'ok', CERRADA: 'ok', ACEPTADA: 'ok', RESUELTA_AUTO: 'ok', EN_ALMACEN: 'ok',
   FUERA_DE_SERVICIO: 'aviso', CON_FALLAS: 'aviso', CON_DISCREPANCIAS: 'aviso', SIN_REPORTE: 'aviso', EN_MANTENIMIENTO: 'aviso',
   ABIERTA: 'aviso', EN_CURSO: 'aviso', EN_ESPERA: 'aviso', PENDIENTE: 'aviso', SIN_VINCULAR: 'aviso',
-  AVERIADO: 'problema', IRREPARABLE: 'problema',
+  AVERIADO: 'problema', IRREPARABLE: 'problema', ACTIVO: 'ok',
 };
 
 export function EstadoPunto({ valor, texto }: { valor: string | null | undefined; texto?: string }) {
   if (!valor) return null;
-  const tono = TONO[valor] ?? 'neutro';
-  return (
-    <span className="insignia">
-      <span className={`punto-estado punto-${tono}`} aria-hidden="true" />
-      {texto ?? et(valor)}
-    </span>
-  );
+  return <PuntoEstado tono={TONO[valor] ?? 'neutro'} texto={texto ?? et(valor)} />;
 }
 
 const REFERENCIAS: Record<string, (id: string) => string> = {
@@ -41,7 +36,7 @@ export function LineaTiempo({ movimientos }: { movimientos: Movimiento[] }) {
           <li key={m.id}>
             <time dateTime={m.fecha}>{fechaHora(m.fecha)}</time>
             <div>
-              <div className="tl-desc">{m.descripcion}</div>
+              <div className="tl-desc">{m.motivo === 'PERMANENTE' ? m.descripcion.replace(/^Asignación permanente(?= a |$)/, 'Asignación sin fecha de devolución') : m.descripcion}</div>
               {m.observacion && <div className="texto-secundario">{m.observacion}</div>}
               <div className="tl-meta">
                 {[m.usuarioNombre ?? 'ScanGP', m.motivo && et(m.motivo)].filter(Boolean).join(' · ')}
@@ -89,8 +84,8 @@ export function useTiposComponente() {
 }
 
 /** Activos en servicio y disponibles (sin asignación ni mantenimiento), para préstamos y reemplazos. */
-export function useOpcionesActivoDisponible(excluir?: string): Opcion[] {
-  const r = usePolling((s) => api.activos.listar({ situacion: 'DISPONIBLE', porPagina: 500 }, s), 60_000);
+export function useOpcionesActivoDisponible(excluir?: string, clave = ''): Opcion[] {
+  const r = usePolling((s) => api.activos.listar({ situacion: 'DISPONIBLE', porPagina: 500 }, s), 60_000, clave);
   return (r.data?.items ?? []).filter((a) => a.id !== excluir).map((a) => ({ valor: a.id, etiqueta: `${a.codigoPatrimonial} · ${a.nombre} (${a.tipo.nombre})` }));
 }
 

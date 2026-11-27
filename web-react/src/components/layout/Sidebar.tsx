@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   ArrowLeftRight, Boxes, Building2, Cpu, Download, GitCompareArrows, House, Library, LogOut, ScanSearch, ScrollText, Settings,
@@ -67,7 +68,7 @@ const GRUPOS: Grupo[] = [
   },
 ];
 
-export function NavPrincipal({ onNavegar }: { onNavegar?: () => void }) {
+export function NavPrincipal({ onNavegar, contraida = false }: { onNavegar?: () => void; contraida?: boolean }) {
   const { puede } = useSesion();
   return (
     <nav aria-label="Principal">
@@ -76,13 +77,20 @@ export function NavPrincipal({ onNavegar }: { onNavegar?: () => void }) {
         if (!visibles.length) return null;
         return (
           <div key={g.titulo ?? i}>
-            {g.titulo && <p className="nav-grupo-titulo">{g.titulo}</p>}
+            {g.titulo && (contraida ? <hr className="nav-separador" /> : <p className="nav-grupo-titulo">{g.titulo}</p>)}
             <ul className="nav-principal">
               {visibles.map((d) => (
                 <li key={d.a}>
-                  <NavLink to={d.a} end={d.fin} onClick={onNavegar} className={({ isActive }) => (isActive ? 'activo' : undefined)}>
+                  <NavLink
+                    to={d.a}
+                    end={d.fin}
+                    onClick={onNavegar}
+                    title={contraida ? d.etiqueta : undefined}
+                    aria-label={contraida ? d.etiqueta : undefined}
+                    className={({ isActive }) => (isActive ? 'activo' : undefined)}
+                  >
                     <Icon icono={d.icono} tamano={20} />
-                    {d.etiqueta}
+                    <span className="nav-texto">{d.etiqueta}</span>
                   </NavLink>
                 </li>
               ))}
@@ -94,39 +102,83 @@ export function NavPrincipal({ onNavegar }: { onNavegar?: () => void }) {
   );
 }
 
-export function Marca() {
-  return (
-    <span className="marca">
+/** Logo y nombre. En la barra lateral es el botón que la contrae y expande. */
+export function Marca({ onClick, contraida }: { onClick?: () => void; contraida?: boolean }) {
+  const contenido = (
+    <>
       <span className="marca-simbolo" aria-hidden="true" />
-      ScanGP
-    </span>
+      <span className="nav-texto">ScanGP</span>
+    </>
+  );
+  if (!onClick) return <span className="marca">{contenido}</span>;
+  return (
+    <button
+      type="button"
+      className="marca marca-boton"
+      onClick={onClick}
+      aria-expanded={!contraida}
+      aria-label={contraida ? 'Expandir el menú lateral' : 'Contraer el menú lateral'}
+      title={contraida ? 'Expandir menú' : 'Contraer menú'}
+    >
+      {contenido}
+    </button>
   );
 }
 
+/** Iniciales para el avatar del usuario. */
+const iniciales = (nombre: string) =>
+  nombre.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]!.toUpperCase()).join('');
+
 /** Usuario con sesión y botón para cerrarla. */
-export function UsuarioPie() {
+export function UsuarioPie({ contraida = false }: { contraida?: boolean }) {
   const { usuario, cerrar } = useSesion();
   if (!usuario) return null;
   return (
     <div className="usuario-pie">
-      <div className="usuario-pie-texto">
+      <span className="avatar" title={contraida ? `${usuario.nombre} · ${ETIQUETA_ROL[usuario.rol]}` : undefined} aria-hidden="true">
+        {iniciales(usuario.nombre)}
+      </span>
+      <div className="usuario-pie-texto nav-texto">
         <span>{usuario.nombre}</span>
         <span className="usuario-pie-rol">{ETIQUETA_ROL[usuario.rol]}</span>
       </div>
-      <Button variante="fantasma" icono={LogOut} aria-label="Cerrar sesión" onClick={cerrar} />
+      <Button variante="fantasma" icono={LogOut} aria-label="Cerrar sesión" onClick={cerrar} className="nav-texto-boton" />
     </div>
   );
 }
 
-/** Barra lateral de escritorio (≥ 768 px). */
-export function Sidebar() {
+const CLAVE_CONTRAIDA = 'scangp.menuContraido';
+
+/** Estado de la barra lateral contraída, recordado en el navegador. */
+export function useBarraContraida() {
+  const [contraida, setContraida] = useState(() => {
+    try {
+      return localStorage.getItem(CLAVE_CONTRAIDA) === '1';
+    } catch {
+      return false;
+    }
+  });
+  const alternar = () =>
+    setContraida((c) => {
+      try {
+        localStorage.setItem(CLAVE_CONTRAIDA, c ? '0' : '1');
+      } catch {
+        /* sin almacenamiento: solo dura la sesión */
+      }
+      return !c;
+    });
+  return { contraida, alternar };
+}
+
+/** Barra lateral de escritorio (≥ 768 px). Se contrae a solo iconos con un clic en el logo. */
+export function Sidebar({ contraida, alternar }: { contraida: boolean; alternar: () => void }) {
   return (
-    <aside className="barra-lateral">
-      <Marca />
-      <NavPrincipal />
+    <aside className={`barra-lateral${contraida ? ' barra-contraida' : ''}`}>
+      <Marca onClick={alternar} contraida={contraida} />
+      <NavPrincipal contraida={contraida} />
       <div className="barra-lateral-pie">
         <EstadoConexionPie />
-        <UsuarioPie />
+        <UsuarioPie contraida={contraida} />
       </div>
     </aside>
   );

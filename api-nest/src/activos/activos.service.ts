@@ -315,6 +315,8 @@ export class ActivosService {
 
   async vincular(actor: Actor, activoId: string, dispositivoId: string, emExterno?: EntityManager, automatico = false) {
     return enTransaccion(this.db, emExterno, async (em) => {
+      const activo = await obtenerOFallar(em, Activo, { id: activoId }, 'Activo');
+      regla(activo.cicloVida !== 'DADO_DE_BAJA', 'No se puede vincular un activo dado de baja');
       const d = await obtenerOFallar(em, DispositivoDetectado, { id: dispositivoId }, 'Equipo detectado');
       regla(!d.activoId || mismoId(d.activoId, activoId), 'Ese equipo detectado ya está vinculado a otro activo');
       if (mismoId(d.activoId, activoId)) return d;

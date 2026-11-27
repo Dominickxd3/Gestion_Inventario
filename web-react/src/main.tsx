@@ -7,6 +7,8 @@ import './design/base.css';
 import './design/primereact.css';
 import './components/ui/ui.css';
 import './components/layout/layout.css';
+import './components/crud/crud.css';
+import './design/alertas.css';
 import './features/equipos/equipos.css';
 import './features/equipo/equipo.css';
 import './features/detectar/detectar.css';

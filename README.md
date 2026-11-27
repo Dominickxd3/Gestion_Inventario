@@ -54,8 +54,12 @@ cd web-react; npm install; npm run dev      # http://localhost:5173
 - `npm run test:e2e`: API completa contra una base **aparte**, `ScanGP_Pruebas`, que se vacía y migra en cada ejecución. Créala una vez con `db/setup.sql` y `DB_NAME="ScanGP_Pruebas"`.
 - `npm run db:check`: falla si las entidades no coinciden con la base.
 
+### Registro automático de equipos
+
+ScanGP registra automáticamente activos y sus componentes identificables al recibir cada inventario. Repetir el mapeo conserva las identidades; los traslados confirmados conservan el historial de máquinas. Flujo y condiciones: [Registro automático](docs/REGISTRO_AUTOMATICO.md).
+
 ### Trazabilidad
-- **Detectado ≠ validado.** ScanGP alimenta *Equipos detectados*; TI registra cada uno como **activo** (código patrimonial `TI-000001`). Desde ahí, los cambios que detecta ScanGP aparecen como **discrepancias** (componente nuevo, de otro equipo o ausente; serie distinta; otra persona usando el equipo) y solo cambian el inventario si TI las acepta.
+- **Registro automático.** ScanGP crea el activo y las piezas con identidad fiable; TI completa los datos administrativos y revisa los conflictos. Las ausencias sin destino conocido y las identidades ambiguas requieren revisión.
 - **Componentes con identidad** (`C-000001`): se instalan, retiran (a almacén, mantenimiento o baja, con motivo), reemplazan y reingresan. Cada instalación queda con fecha de inicio y fin, y ScanGP la **confirma** cuando ve la pieza en el equipo.
 - **Estados separados**: ciclo de vida, estado técnico, asignación, ubicación y sincronización con ScanGP.
 - **Asignaciones**: permanente, préstamo con fecha o reemplazo temporal durante un mantenimiento; transferencias sin pasar por el almacén.

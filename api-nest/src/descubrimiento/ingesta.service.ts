@@ -10,6 +10,7 @@ import { CambioDetectado, DispositivoDetectado, Escaneo } from './descubrimiento
 import { InventarioPayload, ResumenEquipo } from './inventario.types';
 import { ReconciliacionService } from './reconciliacion.service';
 import { erroresInventario } from './validacion';
+import { RegistroAutomaticoService, registroAutomaticoActivo } from './registro-automatico.service';
 
 const GB = 1024 ** 3;
 
@@ -20,8 +21,7 @@ const CAMPOS_HISTORIAL: (keyof ResumenEquipo)[] = [
 
 /**
  * Recepción de inventarios de ScanGP (mundo detectado). El contrato de POST /api/inventario no cambia.
- * Nunca modifica el inventario validado: si el equipo está vinculado a un activo, la reconciliación
- * genera discrepancias para que TI las revise.
+ * Da de alta equipos y componentes automáticamente. Los casos ambiguos se envían a discrepancias.
  */
 @Injectable()
 export class IngestaService {
@@ -31,6 +31,7 @@ export class IngestaService {
     @InjectDataSource() private readonly db: DataSource,
     private readonly reconciliacion: ReconciliacionService,
     private readonly activos: ActivosService,
+    private readonly registroAutomatico: RegistroAutomaticoService,
   ) {}
 
   async registrar(payload: InventarioPayload, ipOrigen: string | null, recibidoEn = new Date()) {
@@ -42,6 +43,10 @@ export class IngestaService {
     const hash = hashContenido(payload);
 
     const r = await this.db.transaction(async (em) => {
+      if (registroAutomaticoActivo()) {
+        // Serializa el alta de catálogo y las piezas compartidas en mapeos concurrentes.
+        await em.query(`DECLARE @r int; EXEC @r = sys.sp_getapplock @Resource = 'ScanGP:registro-automatico', @LockMode = 'Exclusive', @LockOwner = 'Transaction', @LockTimeout = 15000; IF @r < 0 THROW 51000, 'No se pudo bloquear el registro automático; reintenta el escaneo', 1;`);
+      }
       const [bloqueado] = await em.query(`SELECT id FROM [itam].[dispositivo_detectado] WITH (UPDLOCK, HOLDLOCK) WHERE id = @0`, [id]);
       const existente = bloqueado ? await em.findOneByOrFail(DispositivoDetectado, { id }) : null;
 
@@ -62,7 +67,7 @@ export class IngestaService {
         });
       }
 
-      const cambios = existente ? diferencias(existente.resumen as unknown as ResumenEquipo, resumen) : [];
+      const cambios = existente ? [...diferencias(existente.resumen as unknown as ResumenEquipo, resumen), ...diferenciasHardware(existente.ultimoInventario as InventarioPayload | null, payload)] : [];
       for (const c of cambios) {
         await em.insert(CambioDetectado, { id: uuid7(), dispositivoId: id, escaneoId, fecha: recibidoEn, ...c });
       }
@@ -82,6 +87,7 @@ export class IngestaService {
       await em.save(d);
 
       if (!d.activoId) await this.vincularPorEtiqueta(em, d, payload);
+      if (registroAutomaticoActivo()) await this.registroAutomatico.sincronizar(em, d, payload, resumen);
       return { dispositivo: d, nuevo: !existente, cambios: cambios.length, escaneoId: escaneoId!, escaneoNuevo };
     });
 
@@ -95,7 +101,7 @@ export class IngestaService {
         this.logger.error(`Reconciliación de ${resumen.nombreEquipo} falló: ${(e as Error).message}`);
       }
     }
-    return { id: r.dispositivo.id, nuevo: r.nuevo, cambios: r.cambios };
+    return { id: r.dispositivo.id, nuevo: r.nuevo, cambios: r.cambios, activoId: r.dispositivo.activoId };
   }
 
   /**
@@ -196,4 +202,27 @@ function jsonEstable(v: unknown): string {
     return `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${jsonEstable((v as Record<string, unknown>)[k])}`).join(',')}}`;
   }
   return JSON.stringify(v ?? null);
+}
+
+/** También registra reemplazos con igual capacidad/modelo pero distinta serie. */
+export function diferenciasHardware(antes: InventarioPayload | null, ahora: InventarioPayload) {
+  if (!antes) return [];
+  return ['discos', 'memoria', 'procesadores', 'graficos', 'placaBase', 'monitores'].flatMap((campo) => {
+    const a = jsonEstable(antes[campo]);
+    const b = jsonEstable(ahora[campo]);
+    return a === b ? [] : [{ campo: 'hardware.' + campo, anterior: describirHardware(antes[campo]).slice(0, 500), nuevo: describirHardware(ahora[campo]).slice(0, 500) }];
+  });
+}
+
+function describirHardware(valor: unknown): string {
+  if (valor == null) return 'Lectura no disponible';
+  if (Array.isArray(valor)) return valor.map(describirHardware).join('; ') || 'Sin componentes detectados';
+  if (typeof valor !== 'object') return String(valor);
+  const x = valor as Record<string, unknown>;
+  if (Array.isArray(x.modulos)) return describirHardware(x.modulos);
+  return [x.nombre ?? x.modelo ?? x.numeroParte ?? x.tipo ?? x.fabricante,
+    x.numeroSerie ? 'Serie ' + String(x.numeroSerie) : null,
+    typeof x.capacidadBytes === 'number' ? Math.round(x.capacidadBytes / 1024 ** 3) + ' GB' : null,
+    x.soldado ? 'soldada' : null,
+  ].filter(Boolean).join(' · ') || 'Características actualizadas (ver escaneo)';
 }

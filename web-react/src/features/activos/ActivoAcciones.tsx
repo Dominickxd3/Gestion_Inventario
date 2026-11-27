@@ -32,7 +32,7 @@ export function ActivoAcciones({ accion, activo: a, onCerrar, onHecho }: Props) 
           titulo={`Asignar ${a.codigoPatrimonial}`}
           textoEnviar="Asignar"
           campos={[
-            { nombre: 'tipo', etiqueta: 'Tipo', tipo: 'select', opciones: opcionesDe(TIPOS_ASIGNACION.filter((t) => t !== 'TEMPORAL_REEMPLAZO')), requerido: true },
+            { nombre: 'tipo', etiqueta: 'Modalidad de entrega', tipo: 'select', opciones: opcionesDe(TIPOS_ASIGNACION.filter((t) => t !== 'TEMPORAL_REEMPLAZO')), requerido: true },
             { nombre: 'personaId', etiqueta: 'Trabajador', tipo: 'select', opciones: personas, vacio: 'Ninguno (asignar a un área)' },
             { nombre: 'areaId', etiqueta: 'Área', tipo: 'select', opciones: areas, visible: (v) => !v.personaId },
             { nombre: 'hastaPrevisto', etiqueta: 'Devolución prevista', tipo: 'fecha', requerido: true, visible: sinFecha },

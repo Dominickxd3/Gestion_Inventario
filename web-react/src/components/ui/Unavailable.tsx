@@ -1,6 +1,10 @@
-export type MotivoNoDisponible = 'no-detectado' | 'requiere-admin' | 'no-soportado' | 'no-aplica';
+export type MotivoNoDisponible = 'no-detectado' | 'requiere-admin' | 'no-soportado' | 'no-aplica' | 'sin-registrar';
 
 const TEXTOS: Record<MotivoNoDisponible, { texto: string; explicacion: string }> = {
+  'sin-registrar': {
+    texto: 'Sin registrar',
+    explicacion: 'Dato administrativo que TI todavía no completó. Se edita desde la ficha.',
+  },
   'no-detectado': {
     texto: 'No detectado',
     explicacion: 'ScanGP no pudo leer este dato en el equipo o el fabricante no lo informa.',

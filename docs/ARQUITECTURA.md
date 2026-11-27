@@ -1,5 +1,7 @@
 # ScanGP → Plataforma de gestión de activos tecnológicos (ITAM)
 
+> Actualización: el flujo de alta y componentes ahora es automático por defecto. [Reglas vigentes de registro y trazabilidad](REGISTRO_AUTOMATICO.md). Las referencias posteriores al alta exclusivamente manual describen el diseño anterior.
+
 Estado: **implementado (fases 0 a 6)** el 27 nov 2026 sobre SQL Server. Pendiente: diseño definitivo de las pantallas nuevas, actas en PDF y etiquetas QR.
 Fecha: 27 nov 2026. Reglas visuales en [`web-react/DESIGN.md`](../web-react/DESIGN.md).
 

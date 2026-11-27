@@ -57,8 +57,8 @@
   --ease: cubic-bezier(0.2, 0, 0, 1);
 
   /* Layout */
-  --sidebar-width: 232px;
-  --content-max: 1200px;
+  --sidebar-width: 224px;
+  --content-max: 1480px;
   --row-height: 40px;
   --focus-ring: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-accent);
 }
@@ -68,4 +68,10 @@
     --duration-fast: 0ms;
     --duration-base: 0ms;
   }
+}
+
+/* Tokens v2 (DESIGN.md §2) */
+:root {
+  --sidebar-width-collapsed: 60px;
+  --row-height-compact: 36px;
 }

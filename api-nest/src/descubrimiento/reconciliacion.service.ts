@@ -15,6 +15,7 @@ import { MOTIVOS, type Motivo } from '../mantenimiento/orden-mantenimiento.entit
 import { Persona } from '../organizacion/organizacion.entities';
 import { TrazabilidadService } from '../trazabilidad/trazabilidad.service';
 import { componentesDetectados, TIPOS_CON_AUSENCIA, type ComponenteDetectado } from './componentes-detectados';
+import { ausenciaConfirmada } from './registro-automatico.service';
 import { Discrepancia, type TipoDiscrepancia } from './descubrimiento.entities';
 import type { InventarioPayload } from './inventario.types';
 
@@ -117,6 +118,7 @@ export class ReconciliacionService {
       for (const i of instalados) {
         const c = i.componente!;
         if (!c.huella || !TIPOS_CON_AUSENCIA.has(c.tipoComponente!.codigo) || huellasDetectadas.has(c.huella)) continue;
+        if (!ausenciaConfirmada(p, c.tipoComponente!.codigo as 'DISCO' | 'RAM', c.huella)) continue;
         await abrir('COMPONENTE_AUSENTE', c.huella, `${c.tipoComponente!.nombre} ${c.codigo} (${[c.modelo, c.capacidad].filter(Boolean).join(' ')}, serie ${c.numeroSerie}) está registrado en el equipo, pero ScanGP no lo detecta`, {
           componenteId: c.id, codigo: c.codigo,
         });
